@@ -12,18 +12,23 @@ namespace LunkerRedis.src
 {
     class FrontendHandler
     {
-        
-
         private Socket handler = null;
 
         public FrontendHandler() { }
+
         public FrontendHandler(Socket handler)
         {
             this.handler = handler;
         }
+
+        /**
+         * Frontend Server의 request 처리 
+         */
+        public void HandleRequest()
+        {
+
+        }
+        
+
     }
-
-    
-
-
 }

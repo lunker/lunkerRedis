@@ -4,7 +4,12 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+
+using LunkerRedis.src.Common;
+using LunkerRedis.src.Frame;
+using LunkerRedis.src.Utils;
 
 namespace LunkerRedis.src
 {
@@ -19,28 +24,56 @@ namespace LunkerRedis.src
         
         private int PORT = default(int);// host port
         private string IP = default(string); // host ip
+
         private int BACK_LOG = 1000;
 
         public SockListener() { }
-        public SockListener(int port, string ip)
+        public SockListener(string ip, int port)
         {
-            this.PORT = port;
             this.IP = ip;
+            this.PORT = port;
         }
 
         /*
          * 
          */
-        public Socket Listen()
+        public void Listen()
         {
+            Socket peer = null;
+
             listener.Listen(BACK_LOG);
-            listener.Accept();
-            return null;
-        }
+            try
+            {
+                while (true)
+                {
+                    peer = listener.Accept();
+
+                    if(PORT == MyConst.CLIENT_PORT)
+                    {
+                        ClientHandler handler = new ClientHandler(peer);
+                        
+                        Thread clientThread = new Thread(new ThreadStart(handler.HandleRequest));
+                        clientThread.Start();
+                    }
+                    else
+                    {
+                        FrontendHandler handler = new FrontendHandler(peer);
+
+                        Thread clientThread = new Thread(new ThreadStart(handler.HandleRequest));
+                        clientThread.Start();
+                    }
+                  
+                }// end while
+            }
+            catch (SocketException se)
+            {
+
+            }
+        }// end method
         
         /*
          * Host' IP-PORT로  socket connect
-         * return bool 
+         * <return> bool 
          * true:  
          * false: 
          */ 
@@ -52,16 +85,13 @@ namespace LunkerRedis.src
             try
             {
                 host = new IPEndPoint(IPAddress.Parse(IP), PORT);
+                listener.Connect(host);
+                return listener.Connected;
             }
             catch (ArgumentNullException ane)
             {
                 return false;   
             }
-
-            listener.Connect(host);
-
-            return listener.Connected;
-        }
-
+        }// end method
     }
 }

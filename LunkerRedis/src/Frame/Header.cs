@@ -7,11 +7,16 @@ using System.Threading.Tasks;
 
 namespace LunkerRedis.src.Frame
 {
-
     [StructLayout(LayoutKind.Sequential, Pack = 2)]
-    struct Message
+    public struct Header
     {
-        char[] userId;
-        char[] content;
+        short type;
+        int bodyLen;
+
+        public Header(short type, int bodyLen)
+        {
+            this.type = type;
+            this.bodyLen = bodyLen;
+        }
     }
 }
