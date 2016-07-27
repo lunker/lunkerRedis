@@ -4,10 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LunkerRedis.src.Frame
+namespace LunkerRedis.src
 {
-    struct ChatRoom
+    class RedisWorker
     {
+
+
+
 
     }
 }

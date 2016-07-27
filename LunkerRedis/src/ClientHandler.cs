@@ -10,15 +10,23 @@ namespace LunkerRedis.src
 {
     class ClientHandler
     {
-        private Socket handler = null;
+        private Socket peer = null;
 
         public ClientHandler() { }
         public ClientHandler(Socket handler)
         {
-            this.handler = handler;
+            this.peer = handler;
         }
 
-       
+
+        /**
+         * Monitoring Client의 request 처리 
+         */
+        public void HandleRequest()
+        {
+
+        }
+
 
     }// end class
 

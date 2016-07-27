@@ -1,0 +1,20 @@
+
+
+#user-specific files
+*.suo
+*.user
+
+
+#Build results
+[Dd]ebug/
+[R]elease/
+x64/
+build/
+[Bb]in/
+[Oo]bj/
+
+#NuGet Packages
+*.nupkg
+**/packages/*
+
+

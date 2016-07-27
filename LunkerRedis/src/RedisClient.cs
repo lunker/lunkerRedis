@@ -9,7 +9,6 @@ using StackExchange.Redis;
 
 namespace LunkerRedis.src
 {
-     
     class RedisClient
     {
         const string REDIS_IP = "192.168.56.102";
@@ -17,13 +16,22 @@ namespace LunkerRedis.src
         private ConnectionMultiplexer _redis = null;
         private IDatabase db = null;
 
-
         public void Start()
         {
             
-            
         }
-        
+
+        /*
+        public static ConnectionMultiplexer GetRedisClient()
+        {
+            if (_redis != null)
+                return _redis;
+
+            _redis = ConnectionMultiplexer.Connect("192.168.56.102:6379" + ",allowAdmin=true,password=ldk201120841");
+            return _redis;
+        }
+        */
+
         public ConnectionMultiplexer Redis
         {
             get { return this._redis; }
@@ -48,12 +56,23 @@ namespace LunkerRedis.src
             }
         }// end method
 
-        public bool Test()
+
+        public bool addChat(string chat)
         {
-            ;
+            bool result = false;
+
+            result = db.SetAdd(chat, chat);
+            db.StringSet(chat, chat);
+
+            return result;
         }
 
-
+        /*
+        public string getChat()
+        {
+            db.StringGet();
+        }
+        */
 
     }
 }
