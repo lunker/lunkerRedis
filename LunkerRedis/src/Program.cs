@@ -11,7 +11,7 @@ namespace LunkerRedis
 {
     class Program
     {
-
+        src.Common.MessageType.  
 
         static void Main(string[] args)
         {
