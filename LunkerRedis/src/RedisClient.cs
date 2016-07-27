@@ -12,14 +12,22 @@ namespace LunkerRedis.src
      
     class RedisClient
     {
-        const string IP = "192.168.56.102";
-        const int PORT = 6379;
-        private ConnectionMultiplexer redis = null;
+        const string REDIS_IP = "192.168.56.102";
+        const int REDIS_PORT = 6379;
+        private ConnectionMultiplexer _redis = null;
+        private IDatabase db = null;
 
 
         public void Start()
         {
             
+            
+        }
+        
+        public ConnectionMultiplexer Redis
+        {
+            get { return this._redis; }
+            //set { }
         }
 
         /*
@@ -29,9 +37,8 @@ namespace LunkerRedis.src
         {
             try
             {
-                redis = ConnectionMultiplexer.Connect("192.168.56.102:6379"+ ",allowAdmin=true,password=ldk201120841");
-                IDatabase db = redis.GetDatabase();
-
+                _redis = ConnectionMultiplexer.Connect("192.168.56.102:6379"+ ",allowAdmin=true,password=ldk201120841");
+                db = _redis.GetDatabase();
 
                 return true;
             }
@@ -39,7 +46,14 @@ namespace LunkerRedis.src
             {
                 return false;
             }
-
         }// end method
+
+        public bool Test()
+        {
+            ;
+        }
+
+
+
     }
 }

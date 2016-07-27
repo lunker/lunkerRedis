@@ -18,6 +18,7 @@ namespace LunkerRedis
             Console.WriteLine("test");
 
             RedisClient redisClient = new RedisClient();
+
             if (redisClient.Connect())
             {
                 Console.WriteLine("[Connect] success");
@@ -30,13 +31,5 @@ namespace LunkerRedis
             Console.ReadLine();// wait
 
         }// end method
-
-
     }
 }
-
-
-
-
-
-
