@@ -30,7 +30,7 @@ namespace LunkerRedis.src
         {
             // Read Request
             Header header;
-            Message message;
+            MessageFrame message;
 
             Object obj = Parser.Read(peer,   Marshal.SizeOf(typeof(Header)), typeof(Header));
 
@@ -45,8 +45,11 @@ namespace LunkerRedis.src
 
                 //Console.WriteLine("Message marshal size" + Marshal.SizeOf(typeof(Message)));
                 Console.WriteLine("Message size from header " + header.BodyLen);
+                //Console.WriteLine("Message size from marshal " + Marshal.SizeOf(MessageFrame));
 
-                message = (Message) Parser.Read(peer, header.BodyLen, typeof(Message));
+                message = (MessageFrame) Parser.Read(peer, header.BodyLen, typeof(MessageFrame));
+
+                //Console.WriteLine("Client say : " + Encoding.UTF8.GetString(Encoding.Unicode.GetBytes(message.Content)));
 
                 Console.WriteLine("Client say : " + message.Content);
             }

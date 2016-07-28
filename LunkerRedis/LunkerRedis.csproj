@@ -69,7 +69,7 @@
     <Compile Include="src\Frame\Body.cs" />
     <Compile Include="src\Frame\ChatRoom.cs" />
     <Compile Include="src\Frame\Header.cs" />
-    <Compile Include="src\Frame\Message.cs" />
+    <Compile Include="src\Frame\MessageFrame.cs" />
     <Compile Include="src\Frame\RequestMessage.cs" />
     <Compile Include="src\Frame\User.cs" />
     <Compile Include="src\FrontendHandler.cs" />

@@ -75,7 +75,7 @@ namespace LunkerRedis.src.Utils
                     objType = typeof(Header);
                     break;
                 case (int)Types.Message:
-                    objType = typeof(Message);
+                    objType = typeof(MessageFrame);
                     break;
             }
 

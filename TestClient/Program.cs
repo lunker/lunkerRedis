@@ -27,12 +27,28 @@ namespace TestClient
         {
             Console.Write("메세지 입력 : ");
             string content = Console.ReadLine();
+
+
+
+            content += '\0';
+            if (content.Contains('\0'))
+            {
+                Console.WriteLine("has nulll");
+            }
+            else
+                Console.WriteLine("no nulll");
+
+            
             byte[] contentArr = Encoding.UTF8.GetBytes(content);
 
-            Header header = new Header((short)MessageType.Types.CHAT_MSG, contentArr.Length);
-            Message message = new Message(contentArr);
+            Console.WriteLine("[client] 입력받은 문자열의 크기: "+ contentArr.Length * sizeof(char));
 
-            Console.WriteLine("크기: " + Marshal.SizeOf(header));
+            //Console.WriteLine(sizeof(content));
+
+            Header header = new Header((short)MessageType.Types.CHAT_MSG, contentArr.Length * sizeof(char));
+            MessageFrame message = new MessageFrame(content);
+
+            Console.WriteLine("[client] header의 크기: " + Marshal.SizeOf(header));
             //Console.WriteLine("크기: " + Marshal.SizeOf(message));
 
             Socket peer = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);

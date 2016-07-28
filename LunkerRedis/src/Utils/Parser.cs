@@ -125,14 +125,11 @@ namespace LunkerRedis.src.Utils
             }
         }// end method
 
-        public static Message MakeMessage()
+        public static MessageFrame MakeMessage()
         {
+            
 
-
-
-
-
-            return default(Message);
+            return default(MessageFrame);
         }
     }
 }
