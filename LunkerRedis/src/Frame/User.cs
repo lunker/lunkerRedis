@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 
 namespace LunkerRedis.src.Frame
 {
-    class User
+    public struct User
     {
         private string _id;
         private string _password;
-
 
         public string Id
         {
             get { return this._id; }
             set { this._id = value; }
         }
+
 
         public User(string id, string password)
         {

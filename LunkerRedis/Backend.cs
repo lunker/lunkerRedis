@@ -69,14 +69,21 @@ namespace LunkerRedis
 
             // connection for FE 
             frontendListener = new SockListener(MyConst.IP,MyConst.FRONTEND_PORT);
-            frontendListener.Connect();
+            if (frontendListener.Connect())
+                Console.WriteLine("[FE_LISTENER] conenct success");
+            else
+                Console.WriteLine("[FE_LISTENER] conenct fail");
             Thread fListenerThread = new Thread(new ThreadStart(frontendListener.Listen));
             fListenerThread.Start();
             Console.WriteLine("[FE_HANDLER] 초기화 완료");
 
             // connection for Monitoring Server
             clientListener = new SockListener(MyConst.IP, MyConst.CLIENT_PORT);
-            clientListener.Connect();
+            if(clientListener.Connect())
+                Console.WriteLine("[CLINET_LISTENER] conenct success");
+            else
+                Console.WriteLine("[CLIENT_LISTENER] conenct fail");
+
             Thread cListenerThread = new Thread(new ThreadStart(clientListener.Listen));
             cListenerThread.Start();
             Console.WriteLine("[CLIENT_HANDLER] 초기화 완료");

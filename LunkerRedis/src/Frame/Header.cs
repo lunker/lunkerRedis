@@ -10,13 +10,25 @@ namespace LunkerRedis.src.Frame
     [StructLayout(LayoutKind.Sequential, Pack = 2)]
     public struct Header
     {
-        short Type;
-        int BodyLen;
+        private short _type;
+        private int _bodyLen;
 
         public Header(short type, int bodyLen)
         {
-            this.Type = type;
-            this.BodyLen = bodyLen;
+            this._type = type;
+            this._bodyLen = bodyLen;
+        }
+
+        public short Type
+        {
+            get { return this._type; }
+            set { this._type = value; }
+        }
+       
+        public int BodyLen
+        {
+            get { return this._bodyLen; }
+            set { this._bodyLen = value; }
         }
     }
 }

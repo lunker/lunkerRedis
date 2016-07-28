@@ -33,7 +33,7 @@ namespace LunkerRedis.src
             {
 
                 // Read Request
-                Header header = (Header) Parser.Read(peer, MyConst.HEADER_LENGTH, typeof(Header));
+                //Header header = (Header) Parser.Read(peer, MyConst.HEADER_LENGTH, typeof(Header));
                 
                 
 

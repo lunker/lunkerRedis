@@ -66,9 +66,11 @@
     <Compile Include="src\ClientHandler.cs" />
     <Compile Include="src\Common\MessageType.cs" />
     <Compile Include="src\Common\MyConst.cs" />
+    <Compile Include="src\Frame\Body.cs" />
     <Compile Include="src\Frame\ChatRoom.cs" />
     <Compile Include="src\Frame\Header.cs" />
     <Compile Include="src\Frame\Message.cs" />
+    <Compile Include="src\Frame\RequestMessage.cs" />
     <Compile Include="src\Frame\User.cs" />
     <Compile Include="src\FrontendHandler.cs" />
     <Compile Include="Program.cs" />

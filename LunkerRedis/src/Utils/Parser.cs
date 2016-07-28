@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace LunkerRedis.src.Utils
 {
-    static class Parser
+    public static class Parser
     {
         enum Types : short { Header = 1, Message = 2 };
 
@@ -27,6 +27,7 @@ namespace LunkerRedis.src.Utils
             {
                 return null; // 크기가 다르면 null 리턴
             }
+            
             return obj; // 구조체 리턴
         }// end method
 
@@ -53,34 +54,20 @@ namespace LunkerRedis.src.Utils
          */
         public static Object Read(Socket peer, int length, Type type)
         {
-            
             Object obj = null;
-            int rc = default(int);
+            int rc = 0;
             byte[] buff = new byte[length];
             //Type objType = null;
-
-            /*
-            // get message type 
-            switch (type)
-            {
-                case (int)Types.Header:
-                    objType = typeof(Header);
-                    break;
-                case (int)Types.Message:
-                    objType = typeof(Message);
-                    break;
-            }
-            */
-
-
+         
             try
             {
-
                 rc = peer.Receive(buff);
+                Console.WriteLine("[PARSER][READ] " + rc);
 
+                /*
                 if (rc == 0)
                 {
-
+                    Console.WriteLine("[PARSER][READ] " + rc);
                 }
                 else if (rc > 0)
                 {
@@ -90,12 +77,20 @@ namespace LunkerRedis.src.Utils
                 {
 
                 }
+                */
 
                 obj = Parser.ByteToStructure(buff, type);
+
                 return obj;
+            }
+            catch(ArgumentNullException ane)
+            {
+                Console.WriteLine("[PARSER][READ] :" +ane.StackTrace);
+                return null;
             }
             catch (SocketException se)
             {
+                Console.WriteLine("[PARSER][READ] " + se.SocketErrorCode);
                 return null;
             }
         }// end method
@@ -129,5 +124,15 @@ namespace LunkerRedis.src.Utils
                 return false;
             }
         }// end method
+
+        public static Message MakeMessage()
+        {
+
+
+
+
+
+            return default(Message);
+        }
     }
 }
