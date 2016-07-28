@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 namespace LunkerRedis.src.Frame
 {
     [StructLayout(LayoutKind.Sequential, Pack = 2)]
-    public struct Header
+    public struct RequestMessage
     {
-        short Type;
-        int BodyLen;
+        Header Header;
+        Body Body;
 
-        public Header(short type, int bodyLen)
+        public RequestMessage(Header header, Body body)
         {
-            this.Type = type;
-            this.BodyLen = bodyLen;
+            this.Header = header;
+            this.Body = body;
         }
     }
 }

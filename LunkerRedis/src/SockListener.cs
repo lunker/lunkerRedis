@@ -20,7 +20,7 @@ namespace LunkerRedis.src
      */ 
     class SockListener
     {
-        private Socket listener = null;
+        private Socket Listener = null;
         
         private int PORT = default(int);// host port
         private string IP = default(string); // host ip
@@ -41,12 +41,13 @@ namespace LunkerRedis.src
         {
             Socket peer = null;
 
-            listener.Listen(BACK_LOG);
+            Listener.Listen(BACK_LOG);
+            Console.WriteLine("[LISTENER] Listen");
             try
             {
                 while (true)
                 {
-                    peer = listener.Accept();
+                    peer = Listener.Accept();
 
                     if(PORT == MyConst.CLIENT_PORT)
                     {
@@ -81,12 +82,17 @@ namespace LunkerRedis.src
         {
             IPEndPoint host = null;
 
-            listener = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            Listener = new Socket(SocketType.Stream, ProtocolType.Tcp);
             try
             {
                 host = new IPEndPoint(IPAddress.Parse(IP), PORT);
-                listener.Connect(host);
-                return listener.Connected;
+                Listener.Bind(host);
+                return Listener.IsBound;
+            }
+            catch(SocketException se)
+            {
+                Console.WriteLine(se.SocketErrorCode);
+                return false;
             }
             catch (ArgumentNullException ane)
             {

@@ -21,22 +21,14 @@ namespace LunkerRedis.src.Utils
 
             Marshal.Copy(data, 0, buff, data.Length); // 배열에 저장된 데이터를 위에서 할당한 메모리 영역에 복사한다.
             object obj = Marshal.PtrToStructure(buff, type); // 복사된 데이터를 구조체 객체로 변환한다.
-
             Marshal.FreeHGlobal(buff); // 비관리 메모리 영역에 할당했던 메모리를 해제함
 
-
-
             if (Marshal.SizeOf(obj) != data.Length)// (((PACKET_DATA)obj).TotalBytes != data.Length) // 구조체와 원래의 데이터의 크기 비교
-
             {
-                
                 return null; // 크기가 다르면 null 리턴
-
             }
-
             return obj; // 구조체 리턴
         }// end method
-
 
         // 구조체를 byte 배열로
         public static byte[] StructureToByte(object obj)
@@ -59,15 +51,15 @@ namespace LunkerRedis.src.Utils
         /*
          * Read Message From peer 
          */
-        public static Object Read(Socket peer, int length, short type)
+        public static Object Read(Socket peer, int length, Type type)
         {
             
             Object obj = null;
             int rc = default(int);
             byte[] buff = new byte[length];
-            Type objType = null;
+            //Type objType = null;
 
-
+            /*
             // get message type 
             switch (type)
             {
@@ -78,6 +70,8 @@ namespace LunkerRedis.src.Utils
                     objType = typeof(Message);
                     break;
             }
+            */
+
 
             try
             {
@@ -97,7 +91,7 @@ namespace LunkerRedis.src.Utils
 
                 }
 
-                obj = Parser.ByteToStructure(buff, objType);
+                obj = Parser.ByteToStructure(buff, type);
                 return obj;
             }
             catch (SocketException se)

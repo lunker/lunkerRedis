@@ -24,7 +24,7 @@ namespace LunkerRedis
         public void Start()
         {
             Initialize();
-
+            
             /*
             Parser.ByteToStructure(null, typeof(Header));
 
@@ -71,13 +71,14 @@ namespace LunkerRedis
             frontendListener.Connect();
             Thread fListenerThread = new Thread(new ThreadStart(frontendListener.Listen));
             fListenerThread.Start();
-
+            Console.WriteLine("[FE_HANDLER] 초기화 완료");
 
             // connection for Monitoring Server
             clientListener = new SockListener(MyConst.IP, MyConst.CLIENT_PORT);
             clientListener.Connect();
             Thread cListenerThread = new Thread(new ThreadStart(clientListener.Listen));
             cListenerThread.Start();
+            Console.WriteLine("[CLIENT_HANDLER] 초기화 완료");
         }
     }
 }
