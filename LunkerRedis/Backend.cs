@@ -20,7 +20,7 @@ namespace LunkerRedis
         private SockListener frontendListener = null;
         private SockListener clientListener = null;
 
-
+        //wha
         public void Start()
         {
             Initialize();
@@ -51,6 +51,7 @@ namespace LunkerRedis
             Console.WriteLine("전송완료");
             */
 
+            Console.ReadLine();// wait
             Console.ReadLine();// wait
         }
 
