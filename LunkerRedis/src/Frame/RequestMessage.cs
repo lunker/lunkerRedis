@@ -17,6 +17,8 @@ namespace LunkerRedis.src.Frame
         {
             this.Header = header;
             this.Body = body;
+            //
+
         }
     }
 }

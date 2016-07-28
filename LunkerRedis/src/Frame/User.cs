@@ -8,8 +8,8 @@ namespace LunkerRedis.src.Frame
 {
     class User
     {
-        string _id;
-        string _password;
+        private string _id;
+        private string _password;
 
 
         public string Id
