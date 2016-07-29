@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace LunkerRedis.src.Frame
 {
-    public struct Body
+    public struct FBRoomRequestBody
     {
-
-
-
+        string Id;
+        int RoomNo;
     }
 }

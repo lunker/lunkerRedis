@@ -14,14 +14,13 @@ namespace LunkerRedis.src
 {
     class ClientHandler
     {
-        private Socket peer = null;
+        private Socket Peer = null;
 
         public ClientHandler() { }
         public ClientHandler(Socket handler)
         {
-            this.peer = handler;
+            this.Peer = handler;
         }
-
 
         /**
          * Monitoring Client의 request 처리 
@@ -30,36 +29,84 @@ namespace LunkerRedis.src
         {
             // Read Request
             Header header;
-            MessageFrame message;
+            byte[] bodyArr = null;
 
-            Object obj = Parser.Read(peer,   Marshal.SizeOf(typeof(Header)), typeof(Header));
+            header = (Header) Parser.Read(Peer, MyConst.HEADER_LENGTH, typeof(Header));
 
-            if (obj == null)
+            switch (header.Type)
             {
-                Console.WriteLine("[HandleRequest] read header error");
+                case (short) MessageType.Types.REQUEST_USERID_CHECK:
+
+                    break;
+                case (short) MessageType.Types.REQUEST_SIGNUP:
+
+                    break;
+                case (short)MessageType.Types.REQUEST_LOGIN:
+
+                    break;
+                case (short)MessageType.Types.REQUEST_LIST_ROOM:
+
+                    break;
+                case (short)MessageType.Types.REQUEST_JOIN_ROOM:
+
+                    break;
+                case (short)MessageType.Types.REQUEST_LEAVE_ROOM:
+
+                    break;
+                case (short)MessageType.Types.REQUEST_CREATE_ROOM:
+
+                    break;
+
+                case (short)MessageType.Types.REQUEST_CHATTING:
+                    break;
             }
-            else
-            {
-                header = (Header)obj;
-                Console.WriteLine("[HandleRequest] read header success");
-
-                //Console.WriteLine("Message marshal size" + Marshal.SizeOf(typeof(Message)));
-                Console.WriteLine("Message size from header " + header.BodyLen);
-                //Console.WriteLine("Message size from marshal " + Marshal.SizeOf(MessageFrame));
-
-                message = (MessageFrame) Parser.Read(peer, header.BodyLen, typeof(MessageFrame));
-
-                //Console.WriteLine("Client say : " + Encoding.UTF8.GetString(Encoding.Unicode.GetBytes(message.Content)));
-
-                Console.WriteLine("Client say : " + message.Content);
-            }
-
+            //bodyArr = Parser.Read(Peer);
             // Logic 
 
             // Send Response
             //Parser.Send();
         }// end method 
 
+
+        public void CheckUserID(string userId)
+        {
+            //
+        }
+
+        public void HandleSignupRequest()
+        {
+
+        }
+
+        public void HandleLoginRequest()
+        {
+
+        }
+
+        public void HandleListChatRoomRequest()
+        {
+
+        }
+
+        public void HandleEnterChatRoomReqeust()
+        {
+
+        }
+        
+        public void HandleLeaveChatRoomRequest()
+        {
+
+        }
+
+        public void HandleCreateChatRoomRequest()
+        {
+
+        }
+
+        public void HandleChatting()
+        {
+
+        }
     }// end class
 
 

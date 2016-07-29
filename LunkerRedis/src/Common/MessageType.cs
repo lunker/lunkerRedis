@@ -12,17 +12,20 @@ namespace LunkerRedis.src.Common
         public enum Types : short
         {
 
-            REQUEST_SIGNUP=100,
-            REQEUST_CHECK_SIGNEDUP=110,
+            REQUEST_USERID_CHECK=100,
+            REQUEST_SIGNUP =110,
 
-            CHAT_MSG=200,
+            REQUEST_LOGIN=200,
 
-            REQUEST_CREATE_ROOM=310,
-            REQUEST_LEAVE_ROOM=320,
-            REQUEST_JOIN_ROOM=330,
-            REQUEST_LIST_ROOM=340,
+            REQUEST_LIST_ROOM = 300,
+            REQUEST_JOIN_ROOM = 310,
+            REQUEST_LEAVE_ROOM = 320,
+            REQUEST_CREATE_ROOM = 330,
 
-            STATUS_SUCCESS=200,
+            REQUEST_CHATTING = 400,
+
+            STATUS_REQUEST = 100,
+            STATUS_SUCCESS =200,
             STATUS_FAIL=400,
 
         };

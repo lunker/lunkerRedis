@@ -15,13 +15,13 @@ namespace LunkerRedis.src
 {
     class FrontendHandler
     {
-        private Socket peer = null;
+        private Socket Peer = null;
 
         public FrontendHandler() { }
 
-        public FrontendHandler(Socket handler)
+        public FrontendHandler(Socket peer)
         {
-            this.peer = handler;
+            this.Peer = peer;
         }
 
         /**
@@ -33,16 +33,44 @@ namespace LunkerRedis.src
             {
 
                 // Read Request
-                //Header header = (Header) Parser.Read(peer, MyConst.HEADER_LENGTH, typeof(Header));
-                
-                
+                Header header;
+                byte[] bodyArr = null;
 
-                // Logic 
-                
+                header = (Header)Parser.Read(Peer, MyConst.HEADER_LENGTH, typeof(Header));
 
-                // Send Response
-                //Parser.Send();
-            }
+                switch (header.Type)
+                {
+                    case (short)MessageType.Types.REQUEST_USERID_CHECK:
+
+                        Parser.Read(Peer, MessageType.Types.REQUEST_USERID_CHECK,);
+
+
+                        break;
+                    case (short)MessageType.Types.REQUEST_SIGNUP:
+
+                        break;
+                    case (short)MessageType.Types.REQUEST_LOGIN:
+
+                        break;
+                    case (short)MessageType.Types.REQUEST_LIST_ROOM:
+
+                        break;
+                    case (short)MessageType.Types.REQUEST_JOIN_ROOM:
+
+                        break;
+                    case (short)MessageType.Types.REQUEST_LEAVE_ROOM:
+
+                        break;
+                    case (short)MessageType.Types.REQUEST_CREATE_ROOM:
+
+                        break;
+                    case (short)MessageType.Types.REQUEST_CHATTING:
+                        break;
+                    default:
+
+                        break;
+                }// end switch
+            }//end loop
         }
 
 

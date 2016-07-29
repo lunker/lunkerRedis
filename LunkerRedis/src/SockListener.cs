@@ -58,7 +58,7 @@ namespace LunkerRedis.src
                     else
                     {
                         FrontendHandler handler = new FrontendHandler(peer);
-
+                        
                         Thread frontendThread = new Thread(new ThreadStart(handler.HandleRequest));
                         frontendThread.Start();
                     }
