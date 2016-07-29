@@ -35,7 +35,6 @@ namespace LunkerRedis.src
         public ConnectionMultiplexer Redis
         {
             get { return this._redis; }
-            //set { }
         }
 
         /*

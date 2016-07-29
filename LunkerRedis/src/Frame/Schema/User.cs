@@ -23,6 +23,5 @@ namespace LunkerRedis.src.Frame
             _id = id;
             _password = password;
         }
-       
     }// end class
 }
