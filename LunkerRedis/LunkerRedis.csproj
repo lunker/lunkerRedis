@@ -64,17 +64,11 @@
   <ItemGroup>
     <Compile Include="Backend.cs" />
     <Compile Include="src\ClientHandler.cs" />
+    <Compile Include="src\Common\HeaderLength.cs" />
     <Compile Include="src\Common\MessageType.cs" />
     <Compile Include="src\Common\MyConst.cs" />
     <Compile Include="src\Frame\ChatRoom.cs" />
-    <Compile Include="src\Frame\Request\FBChatRequestBody.cs" />
-    <Compile Include="src\Frame\Request\FBLoginRequestBody.cs" />
-    <Compile Include="src\Frame\Request\FBRoomRequestBody.cs" />
     <Compile Include="src\Frame\Header.cs" />
-    <Compile Include="src\Frame\Request\FBRequestHeader.cs" />
-    <Compile Include="src\Frame\Response\FBLoginResponseBody.cs" />
-    <Compile Include="src\Frame\Response\FBRoomResponseBody.cs" />
-    <Compile Include="src\Frame\Response\FBResponseHeader.cs" />
     <Compile Include="src\Frame\User.cs" />
     <Compile Include="src\FrontendHandler.cs" />
     <Compile Include="Program.cs" />
@@ -102,6 +96,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="dist\" />
+    <Folder Include="src\Frame\Client-FE\" />
+    <Folder Include="src\Frame\FE-BE\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
