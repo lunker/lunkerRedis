@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 
 [StructLayout(LayoutKind.Sequential, Pack = 2)]
-struct FBHeader
+public struct FBHeader
 {
     public FBMessageType type;
     public FBMessageState state;
@@ -9,7 +9,7 @@ struct FBHeader
     public int sessionId;
 }
 
-enum FBMessageType : short
+public enum FBMessageType : short
 {
     Id_Dup = 110,
     Signup = 120,
@@ -24,7 +24,7 @@ enum FBMessageType : short
     Chat_Count = 410
 };
 
-enum FBMessageState : short
+public enum FBMessageState : short
 {
     REQUEST = 100,
     SUCCESS = 200,
