@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 
 [StructLayout(LayoutKind.Sequential, Pack = 2)]
-struct FBHeader
+public struct FBHeader
 {
     public FBMessageType type;
     public FBMessageState state;

@@ -57,8 +57,7 @@ namespace LunkerRedis.src.Utils
             Object obj = null;
             int rc = 0;
             byte[] buff = new byte[length];
-            //Type objType = null;
-         
+
             try
             {
                 rc = peer.Receive(buff);
@@ -103,7 +102,14 @@ namespace LunkerRedis.src.Utils
             int rc = default(int);
             try
             {
-                rc = peer.Send(StructureToByte(obj));
+                if(obj is byte[])
+                {
+                   rc =  peer.Send((byte[])obj);
+                }
+                else
+                {
+                    rc = peer.Send(StructureToByte(obj));
+                }
 
                 if (rc == 0) {
                     Console.WriteLine("");

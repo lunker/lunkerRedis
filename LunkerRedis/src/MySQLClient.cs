@@ -32,5 +32,6 @@ namespace LunkerRedis.src
         }
 
 
+        public bool 
     }
 }

@@ -4,8 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using StackExchange.Redis;
-
-
+using LunkerRedis.src.Utils;
 
 namespace LunkerRedis.src
 {
@@ -16,10 +15,7 @@ namespace LunkerRedis.src
         private ConnectionMultiplexer _redis = null;
         private IDatabase db = null;
 
-        public void Start()
-        {
-            
-        }
+        public void Start() { }
 
         /*
         public static ConnectionMultiplexer GetRedisClient()
@@ -55,8 +51,64 @@ namespace LunkerRedis.src
             }
         }// end method
 
+        public bool CheckIdDup(string userId)
+        {
+            //db.SetContains("user", );
 
-        public bool addChat(string chat)
+            return false;
+        }
+
+        /*
+         * Create Room 
+         * Return : int - Chat Room Number
+         */
+        public int CreateChatRoom()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            // user가 들어있는 FE 이름 가져오기 
+            string FE1 = "FE1";
+            string FE2 = "FE2";
+            string FEName = "";
+            if(db.StringGetBit(FE1, 0))
+            {
+                FEName = FE1;
+            }
+            else
+            {
+                FEName = FE2;
+            }
+
+            ///  FE의 채팅방 목록에 추가 
+            string ChattingRoomList = "ChatRoomList";
+            
+            string Delimiter = ":";
+            string Key = "";
+
+            sb.Append(FEName);
+            sb.Append(Delimiter);
+            sb.Append(ChattingRoomList);
+            int roomNo = NumberGenerator.GenerateRoomNo();
+
+            if (db.SetAdd(Key, roomNo))
+                return roomNo;
+            else
+                return -1; // 방 번호 중복 시 예외 처리 
+        }// end method
+
+        public void JoinChatRoom()
+        {
+
+        }
+
+        public void ListChatRoom()
+        {
+            
+
+            db.set
+        }
+
+        public bool AddChat(string chat)
         {
             bool result = false;
 
@@ -64,14 +116,6 @@ namespace LunkerRedis.src
             db.StringSet(chat, chat);
 
             return result;
-        }
-
-        /*
-        public string getChat()
-        {
-            db.StringGet();
-        }
-        */
-
+        }// end method
     }
 }
