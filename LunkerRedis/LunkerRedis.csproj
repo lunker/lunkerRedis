@@ -65,12 +65,9 @@
   <ItemGroup>
     <Compile Include="Backend.cs" />
     <Compile Include="src\ClientHandler.cs" />
-<<<<<<< HEAD
     <Compile Include="src\Common\HeaderLength.cs" />
-=======
     <Compile Include="src\Common\ProtocolLength.cs" />
     <Compile Include="src\Common\MessageType.cs" />
->>>>>>> e6adf318ffbfb2d258efc2d41e4ae2b8f7e07f6a
     <Compile Include="src\Common\MyConst.cs" />
     <Compile Include="src\Frame\ChatRoom.cs" />
     <Compile Include="src\Frame\Client-FE\CFHeader.cs" />
