@@ -45,8 +45,8 @@ namespace TestClient
 
             //Console.WriteLine(sizeof(content));
 
-            Header header = new Header((short)MessageType.Types.CHAT_MSG, contentArr.Length * sizeof(char));
-            MessageFrame message = new MessageFrame(content);
+            Header header = new Header((short) FBMessageType.Chat_Count, contentArr.Length * sizeof(char));
+            //MessageFrame message = new MessageFrame(content);
 
             Console.WriteLine("[client] header의 크기: " + Marshal.SizeOf(header));
             //Console.WriteLine("크기: " + Marshal.SizeOf(message));
@@ -61,6 +61,10 @@ namespace TestClient
 
             peer.Send(Parser.StructureToByte(header));
 
+            //
+            //
+            //
+            // 수정!
             peer.Send(Parser.StructureToByte(message));
             //peer.Send(contentArr);
 

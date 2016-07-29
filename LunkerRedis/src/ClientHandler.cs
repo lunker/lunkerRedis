@@ -35,30 +35,7 @@ namespace LunkerRedis.src
 
             switch (header.Type)
             {
-                case (short) MessageType.Types.REQUEST_USERID_CHECK:
-
-                    break;
-                case (short) MessageType.Types.REQUEST_SIGNUP:
-
-                    break;
-                case (short)MessageType.Types.REQUEST_LOGIN:
-
-                    break;
-                case (short)MessageType.Types.REQUEST_LIST_ROOM:
-
-                    break;
-                case (short)MessageType.Types.REQUEST_JOIN_ROOM:
-
-                    break;
-                case (short)MessageType.Types.REQUEST_LEAVE_ROOM:
-
-                    break;
-                case (short)MessageType.Types.REQUEST_CREATE_ROOM:
-
-                    break;
-
-                case (short)MessageType.Types.REQUEST_CHATTING:
-                    break;
+               
             }
             //bodyArr = Parser.Read(Peer);
             // Logic 

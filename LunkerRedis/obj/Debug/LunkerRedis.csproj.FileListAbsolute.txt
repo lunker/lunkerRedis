@@ -7,3 +7,5 @@ D:\workspace\lunkerRedis\LunkerRedis\bin\Debug\StackExchange.Redis.xml
 D:\workspace\lunkerRedis\LunkerRedis\obj\Debug\LunkerRedis.exe
 D:\workspace\lunkerRedis\LunkerRedis\obj\Debug\LunkerRedis.pdb
 D:\workspace\lunkerRedis\LunkerRedis\obj\Debug\LunkerRedis.csprojResolveAssemblyReference.cache
+D:\workspace\lunkerRedis\LunkerRedis\bin\Debug\MySql.Data.dll
+D:\workspace\lunkerRedis\LunkerRedis\bin\Debug\MySql.Data.xml
