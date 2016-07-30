@@ -17,6 +17,11 @@ namespace LunkerRedis.src.Frame
             set { this._id = value; }
         }
 
+        public string Password
+        {
+            get { return this._password; }
+            set { this._password = value; }
+        }
 
         public User(string id, string password)
         {

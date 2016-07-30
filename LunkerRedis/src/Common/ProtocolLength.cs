@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace LunkerRedis.src.Common
 {
     
-    public enum ProtoclHeaderLength: int
+    public enum ProtocolHeaderLength: int
     {
         /*
         FBChatRequestBody=4, // id
@@ -23,13 +23,15 @@ namespace LunkerRedis.src.Common
 
     public enum ProtocolBodyLength: int
     {
-        FBChatRequestBody = 4, // id
+        FBSignupRequestBody = 20, // id: 10, password: 10 
 
-        FBLoginRequestBody = 21, // id :10 , password : 10 , isDummy : 1
+        FBLoginRequestBody = 21, // id: 10 , password: 10 , isDummy : 1
         //FBLoginResponseBody = -1,
 
         FBRoomRequestBody = 14, // id : 10, roomNo :4 
         FBRoomResponseBody = -1,
+
+        FBChatRequestBody = 4, // id
     }
 }
 

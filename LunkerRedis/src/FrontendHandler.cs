@@ -15,14 +15,15 @@ namespace LunkerRedis.src
 {
     class FrontendHandler
     {
-        private Socket Peer = null;
+        private Socket peer = null;
         private RedisClient redis = null;
+        private MySQLClient mysql = null;
 
         public FrontendHandler() { }
 
         public FrontendHandler(Socket peer)
         {
-            this.Peer = peer;
+            this.peer = peer;
         }
 
         /**
@@ -33,6 +34,8 @@ namespace LunkerRedis.src
 
             redis = new RedisClient();
             redis.Connect();
+            mysql = new MySQLClient();
+            mysql.Connect();
 
             while (true)
             {
@@ -40,63 +43,105 @@ namespace LunkerRedis.src
                 FBHeader header;
                 byte[] bodyArr = null;
 
-                header = (FBHeader)Parser.Read(Peer, (int)ProtoclHeaderLength.FBHeader , typeof(FBHeader));
+                header = (FBHeader)Parser.Read(peer, (int)ProtocolHeaderLength.FBHeader , typeof(FBHeader));
 
                 switch (header.type)
                 {
-<<<<<<< HEAD
-               
-=======
-                    case (short)FBMessageType.Id_Dup:
+                    case FBMessageType.Id_Dup:
                         // 아이디 중복 확인 요청 
                         
 
 
                         break;
-                    case (short)FBMessageType.Signup:
+                    case FBMessageType.Signup:
                         // 회원가입 요청 
 
+                        // read body
+
+                        HandleCreateUser();
+
+                        // generate Header
+
+
+                        //mysql.CreateUser(body.Id, body.Password);
+
+
+
                         break;
-                    case (short)FBMessageType.Login:
+                    case FBMessageType.Login:
+
+
                         // 로그인 요청 
                         break;
-                    case (short)FBMessageType.Room_Create:
+                    case FBMessageType.Room_Create:
                         // 채팅방 생성 : 끝 
-                    
+                        HandleCreateChatRoom();
 
-                        int result = redis.CreateChatRoom();
-                        /*
-                         * Body가 정의되어 있지 않음 . . .
-                         */
-                        // 4byte int 를 byte[]로 전송.
-                        // send result
-                        Parser.Send(Peer, BitConverter.GetBytes(result));
                         break;
-                    case (short)FBMessageType.Room_Leave:
+                    case FBMessageType.Room_Leave:
                         // 채팅방 나가기 : 
                         break;
-                    case (short)FBMessageType.Room_Join:
+                    case FBMessageType.Room_Join:
                         // 채팅방 입장 : 
 
                         break;
-                    case (short)FBMessageType.Room_List:
+                    case FBMessageType.Room_List:
                         // 채팅방 목록 조회 : 
 
                         break;
-                    case (short)FBMessageType.Chat_Count:
+                    case FBMessageType.Chat_Count:
                         break;
 
->>>>>>> e6adf318ffbfb2d258efc2d41e4ae2b8f7e07f6a
+
                     default:
 
                         break;
                 }// end switch
             }//end loop
+        }// end method 
+
+        public void HandleCreateUser()
+        {
+            FBSignupRequestBody body = (FBSignupRequestBody)Parser.Read(peer, (int)ProtocolBodyLength.FBSignupRequestBody, typeof(FBSignupRequestBody));
+            string id = new string(body.Id).Split('\0')[0];// null character 
+            string password = new string(body.Password).Split('\0')[0];// null character 
+
+            bool result =  mysql.CreateUser(id, password);
+
+            if (result)
+            {
+                FBHeader header = new FBHeader();
+
+                // send result
+                Parser.Send(peer, header);
+            }
+            else
+            {
+                ;
+            }
+
+        } 
+
+        public void HandleLogin()
+        {
+            FBSignupRequestBody body = (FBSignupRequestBody)Parser.Read(peer, (int)ProtocolBodyLength.FBSignupRequestBody, typeof(FBSignupRequestBody));
+
+            string id = new string(body.Id).Split('\0')[0];// null character 
+            string password = new string(body.Password).Split('\0')[0];// null character 
+
+            bool result = mysql.Login(id, password);
         }
 
+        public void HandleCreateChatRoom()
+        {
 
-        
-        
-
+            int result = redis.CreateChatRoom();
+            /*
+             * Body가 정의되어 있지 않음 . . .
+             */
+            // 4byte int 를 byte[]로 전송.
+            // send result
+            Parser.Send(peer, BitConverter.GetBytes(result));
+        }
     }
 }

@@ -7,6 +7,24 @@ public struct FBHeader
     public FBMessageState state;
     public int length;
     public int sessionId;
+
+    public int Length
+    {
+        get { return this.length; }
+        set { this.length = value; }
+    }
+
+    public FBMessageType Type
+    {
+        get { return this.type; }
+        set { this.type = value; }
+    }
+
+    public FBMessageState State
+    {
+        get { return this.state; }
+        set { this.state = value; }
+    }
 }
 
 public enum FBMessageType : short

@@ -58,8 +58,9 @@ namespace LunkerRedis
         public void Initialize()
         {
             RedisClient redisClient = new RedisClient();
-            MySQLClient mysqlClient = new MySQLClient();
-            mysqlClient.Connect();
+
+           
+
             if (redisClient.Connect())
             {
                 Console.WriteLine("[Connect] success");
