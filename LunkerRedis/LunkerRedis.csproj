@@ -93,6 +93,7 @@
     <Compile Include="src\RedisClient.cs" />
     <Compile Include="src\RedisWorker.cs" />
     <Compile Include="src\SockListener.cs" />
+    <Compile Include="src\Utils\HeaderFactory.cs" />
     <Compile Include="src\Utils\NumberGenerator.cs" />
     <Compile Include="src\Utils\Parser.cs" />
   </ItemGroup>
@@ -114,6 +115,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="dist\" />
+    <Folder Include="src\Frame\Client-BE\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

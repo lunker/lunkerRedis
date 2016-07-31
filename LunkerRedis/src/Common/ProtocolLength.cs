@@ -31,7 +31,7 @@ namespace LunkerRedis.src.Common
         FBRoomRequestBody = 14, // id : 10, roomNo :4 
         FBRoomResponseBody = -1,
 
-        FBChatRequestBody = 4, // id
+        FBChatRequestBody = 10, // id : 10 
     }
 }
 

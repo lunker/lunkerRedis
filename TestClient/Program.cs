@@ -18,9 +18,6 @@ namespace TestClient
         {
             while (true)
             {
-
-
-         
                 Test();
 
             }

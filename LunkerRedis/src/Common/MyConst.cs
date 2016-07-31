@@ -12,5 +12,7 @@ namespace LunkerRedis.src.Common
         public static int CLIENT_PORT = 10852;
         public static string IP = "127.0.0.1";
         public static int HEADER_LENGTH = 4;
+        public static bool LOGINED = true;
+        public static bool LOGOUT = false;
     }
 }

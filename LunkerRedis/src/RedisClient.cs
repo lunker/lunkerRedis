@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 using LunkerRedis.src.Utils;
+using LunkerRedis.src.Common;
 
 namespace LunkerRedis.src
 {
@@ -35,6 +36,8 @@ namespace LunkerRedis.src
 
         /*
          * Connect to redis server
+         * 
+         *  cache fe list from DB
          */
         public bool Connect()
         {
@@ -55,10 +58,11 @@ namespace LunkerRedis.src
         {
             RedisValue result =  db.StringGet(ip);
 
-            if(result == RedisValue.N)
-
-            return 
-        }
+            if (result == RedisValue.Null)
+                return "";
+            else
+                return (string)result;
+        }// end method
 
 
         public bool CheckIdDup(string userId)
@@ -75,11 +79,47 @@ namespace LunkerRedis.src
         }
 
         /*
+         *  return FE Name List 
+         */
+        public object GetFENameList()
+        {
+            string KEY = "fe:list";
+            string[] feList = null;
+
+            RedisValue[] result = db.HashKeys(KEY);
+
+            feList = new string[result.Length];
+            for (int idx=0; idx<result.Length; idx++)
+            {
+                feList[idx] = result[idx];
+            }
+
+            return feList;
+        }
+
+        // key : remoteName
+        // value: user number id 
+        public bool SetUserLogin(string remoteName, int userNumId, bool state)
+        {
+            string delimiter = ":";
+            string login = "login";
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(remoteName);
+            sb.Append(delimiter);
+            sb.Append(login);
+
+            string key = sb.ToString();
+            
+            return db.StringSetBit(key, userNumId, state);
+        }
+        /*
          * Create Room 
          * 1) GET USER NUM_ID FROM CACHE
          * 2) USER가 접속해 있는 FE이름 가져오기 
          * 3) 채팅방 번호 생성 
          * 4) FE# 의 채팅방 리스트에 추가 
+         * 5) fe#:room#:count metadata 추가 
          * 
          * Return : int - Chat Room Number
          */
@@ -92,8 +132,8 @@ namespace LunkerRedis.src
             int numId = (int) db.StringGet(id);
 
             // 2) user가 들어있는 FE 이름 가져오기 
-            string FE1 = "FE1";
-            string FE2 = "FE2";
+            string FE1 = "fe1";
+            string FE2 = "fe2";
             string FEName = "";
 
             if(db.StringGetBit(FE1, numId))
@@ -139,6 +179,7 @@ namespace LunkerRedis.src
         {
             int[] roomList = null;
 
+            
             StringBuilder sb = new StringBuilder();
             string delimiter = ":";
             string chattingRoomList = "chattingroomlist";
@@ -146,8 +187,9 @@ namespace LunkerRedis.src
             sb.Append(fe);
             sb.Append(delimiter);
             sb.Append(chattingRoomList);
-
+            
             string key = sb.ToString();
+            
 
             roomList = new int[db.SetLength(key)];
         
@@ -161,14 +203,14 @@ namespace LunkerRedis.src
             return roomList;
         }
 
-        public bool AddChat(string chat)
+        public void AddChat(string id)
         {
-            bool result = false;
+            //bool result = false;
 
-            result = db.SetAdd(chat, chat);
-            db.StringSet(chat, chat);
+            //result = db.SetAdd(chat, chat);
+            //db.StringSet(chat, chat);
 
-            return result;
+            db.SortedSetIncrement(Common.RedisKey.Ranking_Key, id, 1);
         }// end method
 
      
