@@ -10,6 +10,7 @@ namespace LunkerRedis.src.Frame
     {
         private string _id;
         private string _password;
+        private int _numId;
 
         public string Id
         {
@@ -22,11 +23,19 @@ namespace LunkerRedis.src.Frame
             get { return this._password; }
             set { this._password = value; }
         }
-
+        
+        public int NumId
+        {
+            get { return this._numId; }
+            set { this._numId = value; }
+        }
+        /*
         public User(string id, string password)
         {
             _id = id;
             _password = password;
         }
+        */
+
     }// end class
 }

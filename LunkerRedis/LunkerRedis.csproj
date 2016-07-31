@@ -82,6 +82,8 @@
     <Compile Include="src\Frame\FE-BE\FBLoginResponseBody.cs" />
     <Compile Include="src\Frame\FE-BE\FBRoomRequestBody.cs" />
     <Compile Include="src\Frame\FE-BE\FBRoomResponseBody.cs" />
+    <Compile Include="src\Frame\FE-BE\FBSignupRequestBody.cs" />
+    <Compile Include="src\Frame\FE-BE\FBSignupResponseBody.cs" />
     <Compile Include="src\Frame\Header.cs" />
     <Compile Include="src\Frame\Schema\User.cs" />
     <Compile Include="src\FrontendHandler.cs" />

@@ -6,4 +6,12 @@ struct FBRoomRequestBody{
     char[] id;
     int roomNo;
 
+    public char[] Id
+    {
+        get { return this.id; }
+    }
+    public int RoomNo
+    {
+        get { return this.roomNo; }
+    }
 }

@@ -12,17 +12,17 @@ namespace LunkerRedis.src
 {
     class MySQLClient
     {
-        private MySqlconnection conn = null;
+        private MySqlConnection conn = null;
 
-        public void connect()
+        public void Connect()
         {
             string config = "";
             config = "server=192.168.56.190;uid=lunker;pwd=dongqlee;database=test";
 
             try
             {
-                conn = new MySqlconnection();
-                conn.connectionString = config;
+                conn = new MySqlConnection();
+                conn.ConnectionString = config;
                 conn.Open();
                 Console.WriteLine("[MYSQL] open connection");
             }
@@ -78,26 +78,28 @@ namespace LunkerRedis.src
             return numId;
         }
 
+        /*
+         * SELECT USER INFO BY ID 
+         */
         public User SelectUserInfo(string id)
         {
             User user = new User();
             // GENERATE QUERY
             StringBuilder sb = new StringBuilder();
-            sb.Append("SELECT (NUM_ID) FROM USER");
+            sb.Append("SELECT * FROM USER");
             sb.Append("WHERE ID=");
             sb.Append(id);
+            string query = sb.ToString();
 
             DataSet ds = new DataSet();
-            MySqlDataAdapter da = new MySqlDataAdapter(sb.ToString(), conn);
+            MySqlDataAdapter da = new MySqlDataAdapter(query, conn);
             da.Fill(ds);
 
             foreach (DataRow row in ds.Tables[0].Rows)
             {
-                
                 user.Id = (string) row["id"];
                 user.Password = (string) row["password"];
             }
-
             
             return user;
         }
