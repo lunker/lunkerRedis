@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using StackExchange.Redis;
 using LunkerRedis.src.Utils;
 using LunkerRedis.src.Common;
+using LunkerRedis.src.Frame.FE_BE;
 
 namespace LunkerRedis.src
 {
@@ -47,6 +48,7 @@ namespace LunkerRedis.src
                 _redis = ConnectionMultiplexer.Connect("192.168.56.102:6379"+ ",allowAdmin=true,password=ldk201120841");
                 pubsub = _redis.GetSubscriber();
                 db = _redis.GetDatabase();
+                Console.WriteLine("[RedisClient] Connect Success");
                 return true;
             }
             catch (Exception e)
@@ -55,47 +57,111 @@ namespace LunkerRedis.src
             }
         }// end method
 
-        public string GetFEName(string ip)
+
+        public FEInfo GetFEInfo(string feName)
         {
-            RedisValue result =  db.StringGet(ip);
+            // key : 
+            HashEntry[] feInfo = db.HashGetAll(feName);
 
-            if (result == RedisValue.Null)
-                return "";
-            else
-                return (string)result;
-        }// end method
+            //Object obj = feInfo[0];
+            FEInfo fe = new FEInfo();
+            for (int idx = 0; idx < feInfo.Length; idx++)
+            {
+                // name
+                if (feInfo[idx].Name.Equals("name"))
+                {
+                    fe.Name = feInfo[idx].Value;   
+                }
+                else if (feInfo[idx].Name.Equals("ip"))
+                {
+                    // ip 
+                    fe.Ip = feInfo[idx].Value;
+                }
+                else
+                {
+                    //prot
+                    fe.Port = Int32.Parse(feInfo[idx].Value);
+                }
 
-
-        public bool CheckIdDup(string userId)
-        {
-            //db.SetContains("user", );
-
-            return false;
-        }
-
-        public bool AddUserCache(string key, int value)
-        {
-            return db.StringSet(key,value);
-            //redis.AddUserCache(result.Id, result.NumId);
+            }
+            return fe;
         }
 
         /*
-         *  return FE Name List 
+         * FE에 해당 채팅방이 있는지 확인 
+         * return bool 
+         * true: 존재 
+         * false: 존재하지 않음 
          */
-        public object GetFENameList()
+        public bool HasChatRoom(string fe, int roomNo)
+        {
+            return db.SetContains(fe, roomNo);
+        }
+
+        public string AddFEInfo(string ip, int port)
+        {
+            string key = ip + Common.RedisKey.DELIMITER + port;
+            string feName = "fe"+ FENameGenerator.GenerateName();
+            if (db.StringSet(key, feName))
+                return feName;
+            return "";
+        }
+
+        public bool AddFEList(string ip, int port) {
+            string key = "fe:list";
+            string value = ip + Common.RedisKey.DELIMITER + port;
+            return db.SetAdd(key, value);
+        }
+
+        public bool DelFEList(string ip, int port)
+        {
+            return false;
+        }
+        /*
+         * 
+         * 로그인 후 , 사용자의 num id를 캐시해둠.
+         * key :id 
+         * value :number id 
+         */
+        public bool AddUserCache(string key, int value)
+        {
+            return db.StringSet(key,value);
+        }
+
+        /*
+         *  현재 이용 가능한 FE의 이름 목록 반환 
+         *  return : FE의 이름. fe1, fe2 . . . . 
+         */
+        public object GetFEList()
         {
             string KEY = "fe:list";
             string[] feList = null;
 
-            RedisValue[] result = db.HashKeys(KEY);
+            RedisValue[] result = db.SetMembers(KEY);
 
+            // result => ip:port 임
             feList = new string[result.Length];
             for (int idx=0; idx<result.Length; idx++)
             {
-                feList[idx] = result[idx];
+                feList[idx] = db.StringGet((string) result[idx]);
             }
 
             return feList;
+        }
+
+        public string GetFEName(String ip)
+        {
+            string key = ip;
+
+            string feName = db.StringGet(key);
+            return feName;
+        }
+
+        public int GetFERoomNum(string feName)
+        {
+            string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.ChattingRoomList;
+            int roomCount = (int)db.SetLength(key);
+            return roomCount;
         }
 
         // key : remoteName
@@ -114,6 +180,22 @@ namespace LunkerRedis.src
             
             return db.StringSetBit(key, userNumId, state);
         }
+       
+        public bool GetUserLogin(string remoteName, int userNumId)
+        {
+            string delimiter = ":";
+            string login = "login";
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(remoteName);
+            sb.Append(delimiter);
+            sb.Append(login);
+
+            string key = sb.ToString();
+
+            return db.StringGetBit(key, userNumId);
+        }
+
         /*
          * Create Room 
          * 1) GET USER NUM_ID FROM CACHE
@@ -137,7 +219,7 @@ namespace LunkerRedis.src
             string FE2 = "fe2";
             string FEName = "";
 
-            if(db.StringGetBit(FE1, numId))
+            if(GetUserLogin(FE1,numId))
             {
                 FEName = FE1;
             }
@@ -214,11 +296,14 @@ namespace LunkerRedis.src
 
         public void AddChat(string id)
         {
+            /*
             //bool result = false;
             db.GetS
             //result = db.SetAdd(chat, chat);
             //db.StringSet(chat, chat);
             db.SortedSetIncrement(Common.RedisKey.Ranking_Chatting, id, 1);
+            */
+
         }// end method
 
      

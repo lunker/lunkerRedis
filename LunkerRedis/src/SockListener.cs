@@ -39,8 +39,8 @@ namespace LunkerRedis.src
          */
         public void Listen()
         {
+            Console.WriteLine("[sock_listener] Listen . . .");
             Listener.Listen(BACK_LOG);
-            Console.WriteLine("[LISTENER] Listen");
             try
             {
                 while (true)
@@ -66,7 +66,7 @@ namespace LunkerRedis.src
             }
             catch (SocketException se)
             {
-
+                Console.WriteLine("[sock_listener] exception . . .");
             }
         }// end method
         

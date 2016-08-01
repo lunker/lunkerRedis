@@ -16,13 +16,14 @@ namespace LunkerRedis.src.Utils
             {
                 // CFHEADER
                 FBHeader header = new FBHeader();
-                header.Type = 
+                //header.Type = 
                 
             }
             else
             {
                 // FBHEADER
             }
+            return null;
         }
     }
 }

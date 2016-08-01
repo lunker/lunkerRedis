@@ -65,7 +65,7 @@ namespace TestClient
             //
             //
             // 수정!
-            peer.Send(Parser.StructureToByte(message));
+            //peer.Send(Parser.StructureToByte(message));
             //peer.Send(contentArr);
 
             Console.WriteLine("전송완료");

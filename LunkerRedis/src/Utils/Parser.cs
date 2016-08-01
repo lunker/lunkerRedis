@@ -53,25 +53,25 @@ namespace LunkerRedis.src.Utils
             int rc = 0;
             byte[] buff = new byte[length];
 
+            /*
             try
             {
                 rc = peer.Receive(buff);
                 Console.WriteLine("[PARSER][READ] " + rc);
 
-                /*
+                
                 if (rc == 0)
                 {
-                    Console.WriteLine("[PARSER][READ] " + rc);
+                    throw new SocketException();
                 }
                 else if (rc > 0)
                 {
-
+                    ;
                 }
                 else
                 {
-
+                    ;
                 }
-                */
 
                 obj = Parser.ByteToStructure(buff, type);
 
@@ -80,13 +80,36 @@ namespace LunkerRedis.src.Utils
             catch(ArgumentNullException ane)
             {
                 Console.WriteLine("[PARSER][READ] :" +ane.StackTrace);
-                return null;
+                throw new SocketException();
+                
             }
             catch (SocketException se)
             {
                 Console.WriteLine("[PARSER][READ] " + se.SocketErrorCode);
-                return null;
+                throw new SocketException();
             }
+            */
+
+            rc = peer.Receive(buff);
+            Console.WriteLine("[PARSER][READ] " + rc);
+
+            if (rc == 0)
+            {
+                throw new SocketException();
+            }
+            else if (rc > 0)
+            {
+                ;
+            }
+            else
+            {
+                ;
+            }
+
+            obj = Parser.ByteToStructure(buff, type);
+
+            return obj;
+
         }// end method
 
         /*
@@ -98,38 +121,55 @@ namespace LunkerRedis.src.Utils
             int rc = 0;
             byte[] buff = new byte[length];
 
+            /*
             try
             {
                 rc = peer.Receive(buff);
-                //Console.WriteLine("[PARSER][READ] " + rc);
 
-                /*
                 if (rc == 0)
                 {
-                    Console.WriteLine("[PARSER][READ] " + rc);
+                    throw new SocketException();
                 }
                 else if (rc > 0)
                 {
-
+                    ;
                 }
                 else
                 {
-
+                    ;
                 }
-                */
+
 
                 return buff;
             }
             catch (ArgumentNullException ane)
             {
                 Console.WriteLine("[PARSER][READ] :" + ane.StackTrace);
-                return null;
+                throw new SocketException();
             }
             catch (SocketException se)
             {
                 Console.WriteLine("[PARSER][READ] " + se.SocketErrorCode);
-                return null;
+                throw new SocketException();
             }
+            */
+
+            rc = peer.Receive(buff);
+
+            if (rc == 0)
+            {
+                throw new SocketException();
+            }
+            else if (rc > 0)
+            {
+                ;
+            }
+            else
+            {
+                ;
+            }
+
+            return buff;
         }
 
         /*
@@ -138,6 +178,7 @@ namespace LunkerRedis.src.Utils
         public static bool Send(Socket peer, Object obj)
         {
             int rc = default(int);
+
             try
             {
                 if(obj is byte[])
@@ -146,7 +187,7 @@ namespace LunkerRedis.src.Utils
                 }
                 else
                 {
-                    rc = peer.Send(StructureToByte(obj));
+                   rc = peer.Send(StructureToByte(obj));
                 }
 
                 if (rc == 0) {
@@ -161,11 +202,12 @@ namespace LunkerRedis.src.Utils
 
                 }
 
+                Console.WriteLine("[parser][send()] " + rc + "bytes");
                 return true;
             }
             catch (SocketException se)
             {
-                return false;
+                throw se;
             }
         }// end method
 

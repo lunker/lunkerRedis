@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LunkerRedis.src.Frame
 {
-    public struct User
+    public class User
     {
         private string _id;
         private string _password;

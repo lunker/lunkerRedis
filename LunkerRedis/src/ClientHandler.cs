@@ -14,12 +14,16 @@ namespace LunkerRedis.src
 {
     class ClientHandler
     {
-        private Socket Peer = null;
+        private Socket peer = null;
+        private RedisClient redis = null;
+        private MySQLClient mysql = null;
 
         public ClientHandler() { }
         public ClientHandler(Socket handler)
         {
-            this.Peer = handler;
+            this.peer = handler;
+            redis = new RedisClient();
+            //mysql = new MySQLClient();
         }
 
         /**
@@ -27,66 +31,80 @@ namespace LunkerRedis.src
          */
         public void HandleRequest()
         {
-            // Read Request
-            Header header;
-            byte[] bodyArr = null;
 
-            header = (Header) Parser.Read(Peer, MyConst.HEADER_LENGTH, typeof(Header));
-
-<<<<<<< HEAD
-            switch (header.Type)
+            while (true)
             {
-               
+                // Read Request
+
+                try
+                {
+                    CBHeader header;
+                    header = (CBHeader)Parser.Read(peer, (int)ProtocolHeaderLength.FBHeader, typeof(CBHeader));
+
+                    switch (header.type)
+                    {
+                        case CBMessageType.Total_Room_Count:
+                            HandleRequestTotalRoomCount(header.Length);
+                            break;
+                        case CBMessageType.FE_User_Status:
+                            HandleFEUserStatus(header.Length);
+                            break;
+                        case CBMessageType.Chat_Ranking:
+                            HandleChatRanking(header.Length);
+                            break;
+                        default:
+                            //HandleError();
+                            break;
+                    }
+                }
+                catch (SocketException se)
+                {
+                    Console.WriteLine("error!!!!!!!!!!!!!!!!!!!!!!");
+                    peer.Close();
+                    return;
+                }
+            }//end loop
+
+        }//end method
+
+        /*
+         * 전체 채팅방 수 조회 
+         * 1) 
+         */
+        public void HandleRequestTotalRoomCount(int bodyLength)
+        {
+            string[] feList = (string[]) redis.GetFEList();
+            int sum = 0;
+            foreach (string fe in feList)
+            {
+                string feName = redis.GetFEName(fe);
+
+                sum += redis.GetFERoomNum(feName);
             }
-=======
->>>>>>> e6adf318ffbfb2d258efc2d41e4ae2b8f7e07f6a
-            //bodyArr = Parser.Read(Peer);
-            // Logic 
 
-            // Send Response
-            //Parser.Send();
-        }// end method 
+            CBHeader header = new CBHeader();
+            header.Type = CBMessageType.Total_Room_Count;
+            header.State = CBMessageState.SUCCESS;
 
+            byte[] data = BitConverter.GetBytes(sum);
 
-        public void CheckUserID(string userId)
-        {
-            //
+            header.Length = data.Length;
+
+            Parser.Send(peer, header);
+            Parser.Send(peer, data);
         }
 
-        public void HandleSignupRequest()
+        public void HandleFEUserStatus(int bodyLength)
         {
 
         }
 
-        public void HandleLoginRequest()
+        public void HandleChatRanking(int bodyLength)
         {
 
         }
 
-        public void HandleListChatRoomRequest()
-        {
 
-        }
-
-        public void HandleEnterChatRoomReqeust()
-        {
-
-        }
-        
-        public void HandleLeaveChatRoomRequest()
-        {
-
-        }
-
-        public void HandleCreateChatRoomRequest()
-        {
-
-        }
-
-        public void HandleChatting()
-        {
-
-        }
     }// end class
 
 

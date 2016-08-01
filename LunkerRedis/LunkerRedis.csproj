@@ -65,12 +65,14 @@
   <ItemGroup>
     <Compile Include="Backend.cs" />
     <Compile Include="src\ClientHandler.cs" />
-    <Compile Include="src\Common\HeaderLength.cs" />
     <Compile Include="src\Common\ProtocolLength.cs" />
     <Compile Include="src\Common\MessageType.cs" />
     <Compile Include="src\Common\MyConst.cs" />
     <Compile Include="src\Common\RedisKey.cs" />
     <Compile Include="src\Frame\ChatRoom.cs" />
+    <Compile Include="src\Frame\Client-BE\CBHeader.cs" />
+    <Compile Include="src\Frame\Client-BE\CBFEUserStatus.cs" />
+    <Compile Include="src\Frame\Client-BE\CBRanking.cs" />
     <Compile Include="src\Frame\Client-FE\CFHeader.cs" />
     <Compile Include="src\Frame\Client-FE\CFLoginResponseBody.cs" />
     <Compile Include="src\Frame\Client-FE\CFRoomRequestBody.cs" />
@@ -85,6 +87,7 @@
     <Compile Include="src\Frame\FE-BE\FBRoomResponseBody.cs" />
     <Compile Include="src\Frame\FE-BE\FBSignupRequestBody.cs" />
     <Compile Include="src\Frame\FE-BE\FBSignupResponseBody.cs" />
+    <Compile Include="src\Frame\FE-BE\FEInfo.cs" />
     <Compile Include="src\Frame\Header.cs" />
     <Compile Include="src\Frame\Schema\User.cs" />
     <Compile Include="src\FrontendHandler.cs" />
@@ -94,6 +97,7 @@
     <Compile Include="src\RedisClient.cs" />
     <Compile Include="src\RedisWorker.cs" />
     <Compile Include="src\SockListener.cs" />
+    <Compile Include="src\Utils\FENameGenerator.cs" />
     <Compile Include="src\Utils\HeaderFactory.cs" />
     <Compile Include="src\Utils\NumberGenerator.cs" />
     <Compile Include="src\Utils\Parser.cs" />
@@ -117,7 +121,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="dist\" />
-    <Folder Include="src\Frame\Client-BE\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

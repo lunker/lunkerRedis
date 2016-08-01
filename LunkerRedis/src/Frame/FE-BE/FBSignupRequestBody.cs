@@ -8,10 +8,13 @@ using System.Threading.Tasks;
 
 struct FBSignupRequestBody
 {
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
     char[] id;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
     char[] password;
+
+    bool isDummy;
+
 
     public char[] Id
     {
@@ -21,5 +24,9 @@ struct FBSignupRequestBody
     public char[] Password
     {
         get { return this.password; }
+    }
+    public bool IsDummy
+    {
+        get { return this.isDummy; }
     }
 }

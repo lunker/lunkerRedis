@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 struct FBSignupResponseBody
 {
+   
     // none
     // using header.status
 

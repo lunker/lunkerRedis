@@ -17,34 +17,64 @@ namespace LunkerRedis.src
         public void Connect()
         {
             string config = "";
-            config = "server=192.168.56.190;uid=lunker;pwd=dongqlee;database=test";
+            config = "server=192.168.56.190;uid=lunker;pwd=dongqlee;database=chatting";
 
             try
             {
                 conn = new MySqlConnection();
                 conn.ConnectionString = config;
                 conn.Open();
-                Console.WriteLine("[MYSQL] open connection");
+                Console.WriteLine("[MYSQL] connect success");
             }
             catch (MySql.Data.MySqlClient.MySqlException ex)
             {
-                Console.WriteLine("[MYSQL] open connection fail");
+                Console.WriteLine("[MYSQL] connect fail");
+            }
+        }
+        
+        /*
+         *return true : 중복
+         * false : 중복x
+         */
+        public bool CheckIdDup(string id)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("SELECT * FROM USER ");
+            sb.Append("WHERE id=");
+            sb.Append("'");
+            sb.Append(id);
+            sb.Append("'");
+            string query = sb.ToString();
+
+            DataSet ds = new DataSet();
+            MySqlDataAdapter da = new MySqlDataAdapter(query, conn);
+            da.Fill(ds);
+
+            if (ds.Tables[0].Rows.Count != 0)
+            {
+                Console.WriteLine("[MYSQL][CheckIdDUp()] duplicate");
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("[MYSQL][CheckIdDup()] not dup");
+                return false;
             }
         }
 
         /*
          * Do Signup 
          */
-        public bool CreateUser(string id, string password)
+        public bool CreateUser(string id, string password, bool isDummy)
         {
             int result = 0;
             StringBuilder sb = new StringBuilder();
-            sb.Append("INSERT INTO USER (ID, PASSWORD, REG_DATE) VALUES ");
+            sb.Append("INSERT INTO USER (ID, PASSWORD, DUMMY, REG_DATE ) VALUES ");
 
-            sb.Append("(" + id + ")");
-            sb.Append("(" + password + ")");
-            sb.Append("(" + "now()" + ")");
-
+            sb.Append("('" + id + "',");
+            sb.Append( "'" + password + "',");
+            sb.Append(isDummy +",");
+            sb.Append("now()" + ")");
 
             MySqlCommand cmd = new MySqlCommand(sb.ToString(), conn);
             result = cmd.ExecuteNonQuery();
@@ -63,10 +93,9 @@ namespace LunkerRedis.src
 
             // GENERATE QUERY
             StringBuilder sb = new StringBuilder();
-            sb.Append("SELECT (NUM_ID) FROM USER");
+            sb.Append("SELECT (NUM_ID) FROM USER ");
             sb.Append("WHERE ID=");
-            sb.Append(id);
-
+            sb.Append("'" + id +"'");
 
             MySqlCommand cmd = new MySqlCommand(sb.ToString(), conn);
             //int result = cmd.ExecuteNonQuery();
@@ -86,19 +115,24 @@ namespace LunkerRedis.src
             User user = new User();
             // GENERATE QUERY
             StringBuilder sb = new StringBuilder();
-            sb.Append("SELECT * FROM USER");
+            sb.Append("SELECT * FROM USER ");
             sb.Append("WHERE ID=");
-            sb.Append(id);
+            sb.Append("'"+id+"'");
             string query = sb.ToString();
 
             DataSet ds = new DataSet();
             MySqlDataAdapter da = new MySqlDataAdapter(query, conn);
             da.Fill(ds);
 
-            foreach (DataRow row in ds.Tables[0].Rows)
+            if (ds.Tables[0].Rows.Count != 0)
             {
-                user.Id = (string) row["id"];
-                user.Password = (string) row["password"];
+                DataRow row = ds.Tables[0].Rows[0];
+                user.Id = (string)row["id"];
+                user.Password = (string)row["password"];
+            }
+            else
+            {
+                return null;
             }
             
             return user;
