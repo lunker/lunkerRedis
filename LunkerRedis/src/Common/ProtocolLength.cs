@@ -18,7 +18,8 @@ namespace LunkerRedis.src.Common
         FBRoomResponseBody = -1,
         */
 
-        FBHeader = 12
+        FBHeader = 12,
+        CBHeader = 8
     };
 
     public enum ProtocolBodyLength: int

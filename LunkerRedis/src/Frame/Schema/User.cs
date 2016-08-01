@@ -11,6 +11,8 @@ namespace LunkerRedis.src.Frame
         private string _id;
         private string _password;
         private int _numId;
+        private bool isDummy;
+
 
         public string Id
         {
@@ -28,6 +30,12 @@ namespace LunkerRedis.src.Frame
         {
             get { return this._numId; }
             set { this._numId = value; }
+        }
+
+        public bool IsDummy
+        {
+            get { return this.isDummy; }
+            set { this.isDummy = value; }
         }
         /*
         public User(string id, string password)

@@ -57,7 +57,10 @@ namespace LunkerRedis.src
             }
         }// end method
 
-
+        /*
+         * Get FE Server Info
+         * return FEInfo Struct 
+         */
         public FEInfo GetFEInfo(string feName)
         {
             // key : 
@@ -87,6 +90,15 @@ namespace LunkerRedis.src
             return fe;
         }
 
+        public string AddFEInfo(string ip, int port)
+        {
+            string key = ip + Common.RedisKey.DELIMITER + port;
+            string feName = "fe" + FENameGenerator.GenerateName();
+            if (db.StringSet(key, feName))
+                return feName;
+            return "";
+        }
+
         /*
          * FE에 해당 채팅방이 있는지 확인 
          * return bool 
@@ -98,14 +110,7 @@ namespace LunkerRedis.src
             return db.SetContains(fe, roomNo);
         }
 
-        public string AddFEInfo(string ip, int port)
-        {
-            string key = ip + Common.RedisKey.DELIMITER + port;
-            string feName = "fe"+ FENameGenerator.GenerateName();
-            if (db.StringSet(key, feName))
-                return feName;
-            return "";
-        }
+        
 
         public bool AddFEList(string ip, int port) {
             string key = "fe:list";
@@ -117,13 +122,14 @@ namespace LunkerRedis.src
         {
             return false;
         }
+
         /*
          * 
          * 로그인 후 , 사용자의 num id를 캐시해둠.
          * key :id 
          * value :number id 
          */
-        public bool AddUserCache(string key, int value)
+        public bool AddUserNumIdCache(string key, int value)
         {
             return db.StringSet(key,value);
         }
@@ -229,7 +235,7 @@ namespace LunkerRedis.src
             }
 
             // 3) 채팅방 번호 생성 
-            int roomNo = NumberGenerator.GenerateRoomNo();
+            int roomNo = ChatRoomNumberGenerator.GenerateRoomNo();
 
             // 4) FE의 채팅방 목록에 추가 
 
