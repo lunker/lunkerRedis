@@ -8,8 +8,19 @@ namespace LunkerRedis.src.Common
 {
     public static class RedisKey
     {
-        public static string Ranking_Key = "chatting:ranking";
+
+        public static string FE = "fe";
+        public static char DELIMITER = ':';
+        
         public static string FE_List = "fe:list";
-        public static string "";
+        public static string Login = "login";
+        public static string ChattingRoomList = "chattingroomlist";
+        public static string Room = "room";
+        public static string Count = "count";
+
+        public static string User = "user";
+
+        public static string Ranking_Chatting = "ranking:chatting";
+
     }
 }

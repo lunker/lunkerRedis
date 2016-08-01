@@ -69,6 +69,7 @@
     <Compile Include="src\Common\ProtocolLength.cs" />
     <Compile Include="src\Common\MessageType.cs" />
     <Compile Include="src\Common\MyConst.cs" />
+    <Compile Include="src\Common\RedisKey.cs" />
     <Compile Include="src\Frame\ChatRoom.cs" />
     <Compile Include="src\Frame\Client-FE\CFHeader.cs" />
     <Compile Include="src\Frame\Client-FE\CFLoginResponseBody.cs" />
@@ -96,6 +97,7 @@
     <Compile Include="src\Utils\HeaderFactory.cs" />
     <Compile Include="src\Utils\NumberGenerator.cs" />
     <Compile Include="src\Utils\Parser.cs" />
+    <Compile Include="src\Utils\RedisKeyGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

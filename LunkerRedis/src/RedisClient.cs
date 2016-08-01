@@ -15,6 +15,7 @@ namespace LunkerRedis.src
         const int REDIS_PORT = 6379;
         private ConnectionMultiplexer _redis = null;
         private IDatabase db = null;
+        private ISubscriber pubsub = null;
 
         public void Start() { }
 
@@ -44,8 +45,8 @@ namespace LunkerRedis.src
             try
             {
                 _redis = ConnectionMultiplexer.Connect("192.168.56.102:6379"+ ",allowAdmin=true,password=ldk201120841");
+                pubsub = _redis.GetSubscriber();
                 db = _redis.GetDatabase();
-
                 return true;
             }
             catch (Exception e)
@@ -149,23 +150,31 @@ namespace LunkerRedis.src
             int roomNo = NumberGenerator.GenerateRoomNo();
 
             // 4) FE의 채팅방 목록에 추가 
-            string ChattingRoomList = "chatroomlist";
-            
+
             string Delimiter = ":";
+            string ChattingRoomList = "chatroomlist";
             string Key = "";
 
             sb.Append(FEName);
             sb.Append(Delimiter);
             sb.Append(ChattingRoomList);
         
-
+            
             if (db.SetAdd(Key, roomNo))
                 return roomNo;
             else
                 return -1; // 방 번호 중복 시 예외 처리 
+
+            // 5) metadata 추가 
+            // fe#:room#:count 
+            // fe#:room#:user  
+            
+
+
+
         }// end method
 
-        
+
         public void JoinChatRoom()
         {
 
@@ -206,11 +215,10 @@ namespace LunkerRedis.src
         public void AddChat(string id)
         {
             //bool result = false;
-
+            db.GetS
             //result = db.SetAdd(chat, chat);
             //db.StringSet(chat, chat);
-
-            db.SortedSetIncrement(Common.RedisKey.Ranking_Key, id, 1);
+            db.SortedSetIncrement(Common.RedisKey.Ranking_Chatting, id, 1);
         }// end method
 
      
