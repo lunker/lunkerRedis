@@ -48,6 +48,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="MySql.Data, Version=6.9.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL" />
     <Reference Include="StackExchange.Redis, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\StackExchange.Redis.1.1.603\lib\net45\StackExchange.Redis.dll</HintPath>
@@ -99,7 +103,7 @@
     <Compile Include="src\SockListener.cs" />
     <Compile Include="src\Utils\FENameGenerator.cs" />
     <Compile Include="src\Utils\HeaderFactory.cs" />
-    <Compile Include="src\Utils\NumberGenerator.cs" />
+    <Compile Include="src\Utils\ChatRoomNumberGenerator.cs" />
     <Compile Include="src\Utils\Parser.cs" />
     <Compile Include="src\Utils\RedisKeyGenerator.cs" />
   </ItemGroup>
@@ -120,7 +124,11 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="config\" />
     <Folder Include="dist\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Logconfig.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

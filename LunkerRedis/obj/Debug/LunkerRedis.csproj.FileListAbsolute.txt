@@ -9,3 +9,5 @@ D:\workspace\lunkerRedis\LunkerRedis\obj\Debug\LunkerRedis.pdb
 D:\workspace\lunkerRedis\LunkerRedis\obj\Debug\LunkerRedis.csprojResolveAssemblyReference.cache
 D:\workspace\lunkerRedis\LunkerRedis\bin\Debug\MySql.Data.dll
 D:\workspace\lunkerRedis\LunkerRedis\bin\Debug\MySql.Data.xml
+D:\workspace\lunkerRedis\LunkerRedis\bin\Debug\log4net.dll
+D:\workspace\lunkerRedis\LunkerRedis\bin\Debug\log4net.xml

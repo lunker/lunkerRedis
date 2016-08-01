@@ -16,5 +16,10 @@ namespace LunkerRedis.src.Common
         public static int HEADER_LENGTH = 4;
         public static bool LOGINED = true;
         public static bool LOGOUT = false;
+        public static bool Dummy = true;
+        public static bool User = false;
+
+        public static string LoggerConfigPath = "D:\\workspace\\LunkerRedis\\LunkerRedis\\Logconfig.xml";
+        public static string Logger = "Logger";
     }
 }
