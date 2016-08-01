@@ -7,11 +7,15 @@ using MySql.Data;
 using MySql.Data.MySqlClient;
 using LunkerRedis.src.Frame;
 using System.Data;
+using log4net;
+using log4net.Config;
+using LunkerRedis.src.Common;
 
 namespace LunkerRedis.src
 {
     class MySQLClient
     {
+        private ILog log = LogManager.GetLogger(MyConst.Logger);
         private MySqlConnection conn = null;
 
         public void Connect()
@@ -67,6 +71,7 @@ namespace LunkerRedis.src
          */
         public bool CreateUser(string id, string password, bool isDummy)
         {
+            log.Info("[MySQL][CreateUser()] start");            
             int result = 0;
             StringBuilder sb = new StringBuilder();
             sb.Append("INSERT INTO USER (ID, PASSWORD, DUMMY, REG_DATE ) VALUES ");
