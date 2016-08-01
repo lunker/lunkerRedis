@@ -39,31 +39,29 @@ namespace LunkerRedis.src
          */
         public void Listen()
         {
-            Socket peer = null;
-
             Listener.Listen(BACK_LOG);
             Console.WriteLine("[LISTENER] Listen");
             try
             {
                 while (true)
                 {
+                    Socket peer = null;
                     peer = Listener.Accept();
 
-                    if(PORT == MyConst.CLIENT_PORT)
+                    if (PORT == MyConst.CLIENT_PORT)
                     {
                         ClientHandler handler = new ClientHandler(peer);
-                        
+
                         Thread clientThread = new Thread(new ThreadStart(handler.HandleRequest));
                         clientThread.Start();
                     }
                     else
                     {
                         FrontendHandler handler = new FrontendHandler(peer);
-
-                        Thread clientThread = new Thread(new ThreadStart(handler.HandleRequest));
-                        clientThread.Start();
+                        
+                        Thread frontendThread = new Thread(new ThreadStart(handler.HandleRequest));
+                        frontendThread.Start();
                     }
-                  
                 }// end while
             }
             catch (SocketException se)
@@ -82,9 +80,11 @@ namespace LunkerRedis.src
         {
             IPEndPoint host = null;
 
-            Listener = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            //Listener.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.);
             try
             {
+
+                Listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 host = new IPEndPoint(IPAddress.Parse(IP), PORT);
                 Listener.Bind(host);
                 return Listener.IsBound;

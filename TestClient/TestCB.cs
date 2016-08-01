@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LunkerRedis.src.Frame
+namespace TestClient
 {
-    public struct Body
+    /*
+     * test for CLIENT-BACKEND
+     */
+    class TestCB
     {
-
-
-
     }
 }

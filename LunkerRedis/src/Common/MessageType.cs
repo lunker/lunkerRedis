@@ -8,43 +8,30 @@ namespace LunkerRedis.src.Common
 {
     static public class MessageType
     {
-
-        public enum Types : short
+        public enum FBMessageType : short
         {
+            Id_Dup = 110,
+            Signup = 120,
 
-            REQUEST_SIGNUP=100,
-            REQEUST_CHECK_SIGNEDUP=110,
+            Login = 210,
 
-            CHAT_MSG=200,
+            Room_Create = 310,
+            Room_Leave = 320,
+            Room_Join = 330,
+            Room_List = 340,
 
-            REQUEST_CREATE_ROOM=310,
-            REQUEST_LEAVE_ROOM=320,
-            REQUEST_JOIN_ROOM=330,
-            REQUEST_LIST_ROOM=340,
-
-            STATUS_SUCCESS=200,
-            STATUS_FAIL=400,
-
+            Chat_Count = 410
         };
-        /*
-        public static short Header = 1;
-        public static short Message = 2;
 
-        public static short _REQUEST_SIGNUP = 100;
-        public static short _REQUEST_CHECK_SIGNEDUP = 110;
+        public enum FBMessageState : short
+        {
+            REQUEST = 100,
+            SUCCESS = 200,
+            FAIL = 400
+        }
+     
 
-        public static short _CHAT_MSG = 200;
-
-        public static short _REQUEST_CREATE_ROOM = 310;
-        public static short _REQUEST_LEAVE_ROOM = 320;
-        public static short _REQUEST_JOIN_ROOM = 330;
-        public static short _REQUEST_LIST_ROOM = 340;
-
-        public static short _STATUS_SUCCESS = 200;
-        public static short _STATUS_FAIL = 400;
-        */
-
-    }
+    }// end class
 
    
 }

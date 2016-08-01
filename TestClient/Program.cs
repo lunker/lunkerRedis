@@ -16,31 +16,59 @@ namespace TestClient
     {
         static void Main(string[] args)
         {
-           Parser.ByteToStructure(null, typeof(Header));
+            while (true)
+            {
+                Test();
 
-           Console.Write("메세지 입력 : " );
-           string content = Console.ReadLine();
-           byte[] contentArr = Encoding.UTF8.GetBytes(content);
-           Header header = new Header((short) MessageType.Types.CHAT_MSG, contentArr.Length);
-
-           Console.WriteLine("크기: " + Marshal.SizeOf(header));
-
-           Socket peer = new Socket(SocketType.Stream, ProtocolType.Tcp);
-           peer.Connect(IPAddress.Parse("127.0.0.1"),MyConst.CLIENT_PORT);
-
-           if(peer.Connected)
-               Console.WriteLine("연결ㅇ");
-           else
-               Console.WriteLine("여ㅑㄴ결x");
-
-           //Header header = new Header(MessageType._CHAT_MSG, contentArr.Length);
-
-           peer.Send(Parser.StructureToByte(header));
-           peer.Send(contentArr);
-
-           Console.WriteLine("전송완료");
+            }
            
+        }
+        public static void Test()
+        {
+            Console.Write("메세지 입력 : ");
+            string content = Console.ReadLine();
 
+
+
+            content += '\0';
+            if (content.Contains('\0'))
+            {
+                Console.WriteLine("has nulll");
+            }
+            else
+                Console.WriteLine("no nulll");
+
+            
+            byte[] contentArr = Encoding.UTF8.GetBytes(content);
+
+            Console.WriteLine("[client] 입력받은 문자열의 크기: "+ contentArr.Length * sizeof(char));
+
+            //Console.WriteLine(sizeof(content));
+
+            Header header = new Header((short) FBMessageType.Chat_Count, contentArr.Length * sizeof(char));
+            //MessageFrame message = new MessageFrame(content);
+
+            Console.WriteLine("[client] header의 크기: " + Marshal.SizeOf(header));
+            //Console.WriteLine("크기: " + Marshal.SizeOf(message));
+
+            Socket peer = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            peer.Connect(IPAddress.Parse("127.0.0.1"), MyConst.CLIENT_PORT);
+
+            if (peer.Connected)
+                Console.WriteLine("연결ㅇ");
+            else
+                Console.WriteLine("여ㅑㄴ결x");
+
+            peer.Send(Parser.StructureToByte(header));
+
+            //
+            //
+            //
+            // 수정!
+            peer.Send(Parser.StructureToByte(message));
+            //peer.Send(contentArr);
+
+            Console.WriteLine("전송완료");
         }
     }
 }

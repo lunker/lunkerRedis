@@ -12,7 +12,7 @@ namespace LunkerRedis.src.Utils
 {
     static class Parser
     {
-        enum Types : short { Header = 1, Message = 2 };
+       
 
         public static object ByteToStructure(byte[] data, Type type)
         {
@@ -69,15 +69,19 @@ namespace LunkerRedis.src.Utils
 
 
             // get message type 
+            // 뭐냐 이건...
+            /*
             switch (type)
             {
                 case (int)Types.Header:
                     objType = typeof(Header);
                     break;
                 case (int)Types.Message:
-                    objType = typeof(Message);
+                    objType = typeof(MessageFrame);
                     break;
             }
+            */
+
 
             try
             {

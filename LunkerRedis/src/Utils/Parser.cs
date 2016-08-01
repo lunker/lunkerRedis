@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace LunkerRedis.src.Utils
 {
-    static class Parser
+    public static class Parser
     {
         enum Types : short { Header = 1, Message = 2 };
 
@@ -27,6 +27,7 @@ namespace LunkerRedis.src.Utils
             {
                 return null; // 크기가 다르면 null 리턴
             }
+            
             return obj; // 구조체 리턴
         }// end method
 
@@ -34,15 +35,10 @@ namespace LunkerRedis.src.Utils
         public static byte[] StructureToByte(object obj)
         {
             int datasize = Marshal.SizeOf(obj);//((PACKET_DATA)obj).TotalBytes; // 구조체에 할당된 메모리의 크기를 구한다.
-
             IntPtr buff = Marshal.AllocHGlobal(datasize); // 비관리 메모리 영역에 구조체 크기만큼의 메모리를 할당한다.
-
             Marshal.StructureToPtr(obj, buff, false); // 할당된 구조체 객체의 주소를 구한다.
-
             byte[] data = new byte[datasize]; // 구조체가 복사될 배열
-
             Marshal.Copy(buff, data, 0, datasize); // 구조체 객체를 배열에 복사
-
             Marshal.FreeHGlobal(buff); // 비관리 메모리 영역에 할당했던 메모리를 해제함
 
             return data; // 배열을 리턴
@@ -53,34 +49,19 @@ namespace LunkerRedis.src.Utils
          */
         public static Object Read(Socket peer, int length, Type type)
         {
-            
             Object obj = null;
-            int rc = default(int);
+            int rc = 0;
             byte[] buff = new byte[length];
-            //Type objType = null;
-
-            /*
-            // get message type 
-            switch (type)
-            {
-                case (int)Types.Header:
-                    objType = typeof(Header);
-                    break;
-                case (int)Types.Message:
-                    objType = typeof(Message);
-                    break;
-            }
-            */
-
 
             try
             {
-
                 rc = peer.Receive(buff);
+                Console.WriteLine("[PARSER][READ] " + rc);
 
+                /*
                 if (rc == 0)
                 {
-
+                    Console.WriteLine("[PARSER][READ] " + rc);
                 }
                 else if (rc > 0)
                 {
@@ -90,15 +71,66 @@ namespace LunkerRedis.src.Utils
                 {
 
                 }
+                */
 
                 obj = Parser.ByteToStructure(buff, type);
+
                 return obj;
+            }
+            catch(ArgumentNullException ane)
+            {
+                Console.WriteLine("[PARSER][READ] :" +ane.StackTrace);
+                return null;
             }
             catch (SocketException se)
             {
+                Console.WriteLine("[PARSER][READ] " + se.SocketErrorCode);
                 return null;
             }
         }// end method
+
+        /*
+         * Read length byte from peer 
+         * return byte[]
+         */
+        public static byte[] Read(Socket peer, int length)
+        {
+            int rc = 0;
+            byte[] buff = new byte[length];
+
+            try
+            {
+                rc = peer.Receive(buff);
+                //Console.WriteLine("[PARSER][READ] " + rc);
+
+                /*
+                if (rc == 0)
+                {
+                    Console.WriteLine("[PARSER][READ] " + rc);
+                }
+                else if (rc > 0)
+                {
+
+                }
+                else
+                {
+
+                }
+                */
+
+                return buff;
+            }
+            catch (ArgumentNullException ane)
+            {
+                Console.WriteLine("[PARSER][READ] :" + ane.StackTrace);
+                return null;
+            }
+            catch (SocketException se)
+            {
+                Console.WriteLine("[PARSER][READ] " + se.SocketErrorCode);
+                return null;
+            }
+        }
 
         /*
          * Send Message To Peer
@@ -108,7 +140,14 @@ namespace LunkerRedis.src.Utils
             int rc = default(int);
             try
             {
-                rc = peer.Send(StructureToByte(obj));
+                if(obj is byte[])
+                {
+                   rc =  peer.Send((byte[])obj);
+                }
+                else
+                {
+                    rc = peer.Send(StructureToByte(obj));
+                }
 
                 if (rc == 0) {
                     Console.WriteLine("");
@@ -129,5 +168,6 @@ namespace LunkerRedis.src.Utils
                 return false;
             }
         }// end method
+
     }
 }
