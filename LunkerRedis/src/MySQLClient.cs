@@ -13,10 +13,26 @@ using LunkerRedis.src.Common;
 
 namespace LunkerRedis.src
 {
-    class MySQLClient
+    public class MySQLClient
     {
         private ILog log = LogManager.GetLogger(MyConst.Logger);
         private MySqlConnection conn = null;
+
+        private MySQLClient() { }
+
+        private static MySQLClient instance = null;
+        public static MySQLClient Instance
+        {
+            get
+            {
+                if (instance==null)
+                {
+                    instance = new MySQLClient();
+                    instance.Connect();
+                }
+                return instance;
+            }
+        }
 
         public void Connect()
         {

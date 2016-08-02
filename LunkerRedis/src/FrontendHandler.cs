@@ -36,11 +36,9 @@ namespace LunkerRedis.src
 
             // redis setup 
             redis = RedisClient.RedisInstance;
-            redis.Connect();
-        
+ 
             // mysql  setup 
-            mysql = new MySQLClient();
-            mysql.Connect();
+            mysql = MySQLClient.Instance;
 
             logger.Debug("FrontendHandler constructor finish");
         }
@@ -240,7 +238,6 @@ namespace LunkerRedis.src
                 // 3) 로그인 여부 저장
                 redis.SetUserLogin(remoteName, result.NumId, MyConst.LOGINED);
 
-
                 // 4) set dummy offset
                 if (result.IsDummy)
                     redis.SetUserType(id, MyConst.Dummy);
@@ -369,7 +366,8 @@ namespace LunkerRedis.src
             if (redis.HasChatRoom(remoteName, body.RoomNo))
             {
                 redis.AddUserChatRoom(remoteName, body.RoomNo, id);
-
+                redis.IncChatRoomCount(remoteName, body.RoomNo);
+  
                 header.State = FBMessageState.SUCCESS;
 
                 //header.Length = Marshal.SizeOf(BitConverter.GetBytes(body.RoomNo));
@@ -379,6 +377,20 @@ namespace LunkerRedis.src
             }
             else
             {
+                /*****
+                 * 
+                 *여 
+                 * 기 
+                 * 문
+                 * 제 
+                 * 임 
+                 * ㅠ
+                 * ㅠ
+                 * ㅠ
+                 * ㅠ
+                 * ㅠ
+                 *  
+                 */
                 // 2-2) 채팅방이 다른 서버에 존재,
                 // 다른 FE의 정보를 넘겨준다. 
                 header.State = FBMessageState.FAIL;
@@ -409,6 +421,10 @@ namespace LunkerRedis.src
                         break;
                     }
                 }
+
+                //??????????????????
+                //???????????????????????
+
             }// end if 
 
             Console.WriteLine("[fe_handler][HandleJoinRoom] finish");

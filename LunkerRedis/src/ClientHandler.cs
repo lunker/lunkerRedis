@@ -83,7 +83,7 @@ namespace LunkerRedis.src
             {
                 string feName = redis.GetFEName(fe);
 
-                sum += redis.GetFERoomNum(feName);
+                sum += redis.GetFETotalChatRoomCount(feName);
             }
 
             CBHeader header = new CBHeader();
