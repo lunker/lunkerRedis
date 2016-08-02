@@ -31,27 +31,28 @@ namespace LunkerRedis.src
 
         public FrontendHandler(Socket peer)
         {
-            logger.Debug("start");
+            logger.Debug("FrontendHandler constructor start");
             this.peer = peer;
 
             // redis setup 
-            redis = new RedisClient();
+            redis = RedisClient.RedisInstance;
             redis.Connect();
         
             // mysql  setup 
             mysql = new MySQLClient();
             mysql.Connect();
 
-            IPEndPoint ep = (IPEndPoint) peer.RemoteEndPoint;
-
-            remoteIP = ep.Address.ToString();
-            remotePort = ep.Port;
-            logger.Debug("finish");
+            logger.Debug("FrontendHandler constructor finish");
         }
 
 
         public void Initialize()
         {
+            IPEndPoint ep = (IPEndPoint)peer.RemoteEndPoint;
+
+            remoteIP = ep.Address.ToString();
+            remotePort = ep.Port;
+
             //Console.WriteLine("[fe_handler][Initialize] start");
             logger.Debug("start");
             // 1) add 서버ip:port ~ FE Name && generate FE Name 
@@ -63,7 +64,7 @@ namespace LunkerRedis.src
             redis.AddFEList(remoteIP, remotePort);
 
             // set remote's FE Name 
-            remoteName = redis.GetFEName(remoteIP);
+            //remoteName = redis.GetFEName(remoteIP, remotePort);
 
             Console.WriteLine("[fe_handler][Initialize] finish");
         }// end method
@@ -106,15 +107,15 @@ namespace LunkerRedis.src
                             break;
                         case FBMessageType.Room_Join:
                             // 채팅방 입장 : 끝
-                            HandleJoinRoom(header.Length);
+                            HandleJoinRoom(header.SessionId, header.Length);
                             break;
                         case FBMessageType.Room_List:
                             // 채팅방 목록 조회 : 끝
-                            HandleListRoom(header.Length);
+                            HandleListRoom(header.SessionId, header.Length);
                             break;
                         case FBMessageType.Chat_Count:
                             // 채팅 건수 저장 : 끝
-                            HandleChat(header.Length);
+                            HandleChat(header.SessionId, header.Length);
                             break;
                         default:
                             HandleError();
@@ -125,9 +126,12 @@ namespace LunkerRedis.src
                 {
                     Console.WriteLine("[fe_handler] disconnected . . .");
                     peer.Close();
+
+                    HandleClear();
                     redis = null;
                     mysql = null;
 
+                    logger.Debug("[fe_handler] release all resources");
                     return;
                 }
             }//end loop
@@ -283,7 +287,7 @@ namespace LunkerRedis.src
 
                 FBRoomRequestBody body = (FBRoomRequestBody)Parser.Read(peer, bodyLength, typeof(FBRoomRequestBody));
                 string id = new string(body.Id).Split('\0')[0];// null character 
-                int result = redis.CreateChatRoom(id);
+                int result = redis.CreateChatRoom(remoteName,id);
                 Console.WriteLine("[fe_handler][HandleCreateChatRoom()] created room No : " + result);
                 // header
                 FBHeader header = new FBHeader();
@@ -323,7 +327,7 @@ namespace LunkerRedis.src
             int roomNo = body.RoomNo;
 
 
-            bool leaveResult = redis.LeaveChatRoom(remoteName, id, roomNo);
+            bool leaveResult = redis.LeaveChatRoom(remoteName, roomNo, id);
 
             // 2) 채팅방의 COUNT 감소 
             int decResult = redis.DecChatRoomCount(id,roomNo);
@@ -350,7 +354,7 @@ namespace LunkerRedis.src
          * 2-2) 같은 방이 아니면 실패 
          * 
          */
-        public void HandleJoinRoom(int bodyLength)
+        public void HandleJoinRoom(int sessionId, int bodyLength)
         {
             Console.WriteLine("[fe_handler][HandleJoinRoom] start");
             FBRoomRequestBody body = (FBRoomRequestBody)Parser.Read(peer, bodyLength, typeof(FBRoomRequestBody));
@@ -359,11 +363,13 @@ namespace LunkerRedis.src
             // 1) 같은 서버에 존재하는지 확인 
             FBHeader header = new FBHeader();
             header.Type = FBMessageType.Room_Join;
-
+            header.SessionId = sessionId;
             // 2-1) 채팅방이 같은 서버에 존재.
             // 입장 
             if (redis.HasChatRoom(remoteName, body.RoomNo))
             {
+                redis.AddUserChatRoom(remoteName, body.RoomNo, id);
+
                 header.State = FBMessageState.SUCCESS;
 
                 //header.Length = Marshal.SizeOf(BitConverter.GetBytes(body.RoomNo));
@@ -413,30 +419,36 @@ namespace LunkerRedis.src
          * 2) 해당 FE의 CHATTING LIST를 조회.
          * 3) 결과 Header + Data 전송 
          */
-        public void HandleListRoom(int bodyLength)
+        public void HandleListRoom(int sessionId, int bodyLength)
         {
             Console.WriteLine("[fe_handler][HandleListRoom] start");
             // 1) 모든 FE의 이름을 가져와야 함. 
             //string feName = redis.GetFEName(remoteIP);
             string[] feList = (string[]) redis.GetFEList();
 
+
+            /**
+             * fe2가 계속 들어가있다.. 접속한 횟수만큼.. ㅠㅠㅠㅠ 
+             */
             // 2) fe의 chatting room list 조회 
             int[] chatRoomList = null;
             foreach (string fe in feList)
             {
                 if (chatRoomList != null)
-                    chatRoomList.Concat((int[])redis.ListChatRoom(fe));
+                    chatRoomList.Concat((int[])redis.GetFEChattingRoomList(fe));
                 else
-                    chatRoomList = (int[])redis.ListChatRoom(fe);
+                    chatRoomList = (int[])redis.GetFEChattingRoomList(fe);
             }
             
             // 3) create Header
             FBHeader header = new FBHeader();
+            header.SessionId = sessionId;
             // generate body data
             byte[] data = chatRoomList.SelectMany(BitConverter.GetBytes).ToArray();
 
             if(data.Length != 0)
             {
+                Console.WriteLine("[fe_handler][HandleListRoom] data size != 0");
                 header.Length = data.Length;
                 header.Type = FBMessageType.Room_List;
                 header.State = FBMessageState.SUCCESS;
@@ -450,7 +462,8 @@ namespace LunkerRedis.src
             }
             else
             {
-                header.Length = data.Length;
+                Console.WriteLine("[fe_handler][HandleListRoom] data size ==0");
+                header.Length = 0;
                 header.Type = FBMessageType.Room_List;
                 header.State = FBMessageState.SUCCESS;
 
@@ -463,7 +476,7 @@ namespace LunkerRedis.src
         /*
          * 1) add user chat count 
          */
-        public void HandleChat(int bodyLength)
+        public void HandleChat(int sessionId, int bodyLength)
         {
             // data: user id
             Console.WriteLine("[fe_handler][HandleChat] start");
@@ -481,6 +494,40 @@ namespace LunkerRedis.src
 
 
             Console.WriteLine("[fe_handler][HandleChat] finish");
+        }
+
+        /*
+         * Clear FE Information From redis 
+         */
+        public void HandleClear()
+        {
+            logger.Debug("Clear FE Info start");
+
+            // 1) delete 서버ip:port ~ FE Name && generate FE Name 
+            redis.DelFEInfo(remoteIP, remotePort);
+
+            // 2)이하 전부 feName으로 제거! 
+            // 2) fe:list에서 제거 
+            // parameter : ip:port 
+            redis.DelFEList(remoteIP, remotePort);
+
+            // 3) key fe:login 삭제 
+            redis.DelUserLoginKey(remoteName);
+
+            // 4) key fe:chattingroomlist 삭제 
+            redis.DelFEChattingRoomListKey(remoteName);
+
+            // 5-*) get room# in 삭제될 fe
+            int[] roomNoList = (int[]) redis.GetFEChattingRoomList(remoteName);
+            foreach(int roomNo in roomNoList)
+            {
+                // 5) key fe:room#:count 삭제 
+                redis.DelChattingRoomCountKey(remoteName, roomNo);
+
+                // 6) key fe:room#user 삭제 
+                redis.DelUserChatRoomKey(remoteName, roomNo);
+            }
+            logger.Debug("Clear FE Info start");
         }
 
         public void HandleError()

@@ -24,7 +24,7 @@ namespace LunkerRedis.src
         public ClientHandler(Socket handler)
         {
             this.peer = handler;
-            redis = new RedisClient();
+            redis = RedisClient.RedisInstance;
             //mysql = new MySQLClient();
         }
 
@@ -123,7 +123,7 @@ namespace LunkerRedis.src
                 string feName = redis.GetFEName(feList[idx]);
 
                 // 3) 해당 fe에 열려있는 채팅방 번호 조회 
-                int[] roomList = (int[]) redis.ListChatRoom(feName);
+                int[] roomList = (int[]) redis.GetFEChattingRoomList(feName);
 
                 // 4) 각각의 채팅방 count조회 
 

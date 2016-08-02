@@ -1,6 +1,7 @@
 ﻿using LunkerRedis.src;
 using LunkerRedis.src.Frame;
 using LunkerRedis.src.Utils;
+using LunkerRedis.src.Common;
 
 using System;
 using System.Threading;
@@ -8,10 +9,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using LunkerRedis.src.Common;
+using log4net;
+using System.Windows;
+
+
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+
 
 namespace LunkerRedis
 {
@@ -19,14 +24,16 @@ namespace LunkerRedis
     {
         private SockListener frontendListener = null;
         private SockListener clientListener = null;
+        private ILog logger = FileLogger.GetLoggerInstance();
 
         //wha
         public void Start()
         {
             Initialize();
 
-            Console.ReadLine();// wait
-            Console.ReadLine();// wait
+            Console.WriteLine(Console.ReadLine());
+            //Console.ReadLine();// wait
+            
         }
 
         public void Initialize()
@@ -52,6 +59,23 @@ namespace LunkerRedis
             Thread cListenerThread = new Thread(new ThreadStart(clientListener.Listen));
             cListenerThread.Start();
             Console.WriteLine("[CLIENT_HANDLER] 초기화 완료");
+
+            while (true)
+            {
+                switch (cListenerThread.ThreadState)
+                {
+                    case ThreadState.Aborted:
+                        
+                    case ThreadState.Stopped:
+                        Console.WriteLine("asdfasdf");
+                        logger.Info("Client Thread is Stopped");
+                        break;
+
+                }
+
+            }
+            //cListenerThread.Join();
+
         }
     }
 }

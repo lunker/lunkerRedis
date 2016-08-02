@@ -6,12 +6,12 @@
 
 
 #Build results
-*/[Dd]ebug/
-*/[R]elease/
+LunkerRedis/bin/[Dd]ebug/
+*/*/[R]elease/
 x64/
 */build/
 */[Bb]in/
-[Oo]bj/
+LunkerRedis/[Oo]bj/*
 
 
 #NuGet Packages
