@@ -5,11 +5,13 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
+using log4net;
 
 using LunkerRedis.src.Utils;
 using LunkerRedis.src.Common;
 using LunkerRedis.src.Frame;
-using System.Runtime.InteropServices;
+
 using LunkerRedis.src.Frame.FE_BE;
 
 namespace LunkerRedis.src
@@ -23,10 +25,13 @@ namespace LunkerRedis.src
         private int remotePort = 0;
         private string remoteName = "";
 
+        private ILog logger = FileLogger.GetLoggerInstance();
+
         public FrontendHandler() { }
 
         public FrontendHandler(Socket peer)
         {
+            logger.Debug("start");
             this.peer = peer;
 
             // redis setup 
@@ -41,12 +46,14 @@ namespace LunkerRedis.src
 
             remoteIP = ep.Address.ToString();
             remotePort = ep.Port;
+            logger.Debug("finish");
         }
 
 
         public void Initialize()
         {
-            Console.WriteLine("[fe_handler][Initialize] start");
+            //Console.WriteLine("[fe_handler][Initialize] start");
+            logger.Debug("start");
             // 1) add 서버ip:port ~ FE Name && generate FE Name 
             string feName = redis.AddFEInfo(remoteIP, remotePort);
             if (!feName.Equals(""))
@@ -106,7 +113,7 @@ namespace LunkerRedis.src
                             HandleListRoom(header.Length);
                             break;
                         case FBMessageType.Chat_Count:
-                            // 채팅 건수 저장 :
+                            // 채팅 건수 저장 : 끝
                             HandleChat(header.Length);
                             break;
                         default:
@@ -232,10 +239,9 @@ namespace LunkerRedis.src
 
                 // 4) set dummy offset
                 if (result.IsDummy)
-                    redis.SetDummy(result.NumId, MyConst.Dummy);
+                    redis.SetUserType(id, MyConst.Dummy);
                 else
-                    redis.SetDummy(result.NumId, MyConst.User);
-
+                    redis.SetUserType(id, MyConst.User);
 
                 FBLoginResponseBody response = new FBLoginResponseBody();
                 response.Id = body.Id;
@@ -252,6 +258,14 @@ namespace LunkerRedis.src
                 Parser.Send(peer, header);
             }
             Console.WriteLine("[fe_handler][HandleLogin()] finish");
+        }
+
+        /*
+         * Logout 
+         */
+        public void HandleLogout()
+        {
+
         }
 
         /*
@@ -301,11 +315,32 @@ namespace LunkerRedis.src
          */
         public void HandleLeaveRoom(int sessionId, int bodyLength)
         {
-            // 채팅방에서 유저 삭제 
+            Console.WriteLine("[fe_handler][HandleLeaveRoom()] start");
 
-            //redis.
+            // 1) 채팅방에서 유저 삭제 
+            FBRoomRequestBody body = (FBRoomRequestBody)Parser.Read(peer, bodyLength, typeof(FBRoomRequestBody));
+            string id = new string(body.Id).Split('\0')[0];// null character 
+            int roomNo = body.RoomNo;
 
-        }
+
+            bool leaveResult = redis.LeaveChatRoom(remoteName, id, roomNo);
+
+            // 2) 채팅방의 COUNT 감소 
+            int decResult = redis.DecChatRoomCount(id,roomNo);
+
+            if(leaveResult && decResult == 0)
+            {
+                // 방삭제 
+                Console.WriteLine("[fe_handler][HandleLeaveRoom()] leave room && delete room ");
+            }
+            else if(leaveResult && decResult != 0)
+            {
+                // send result 
+                Console.WriteLine("[fe_handler][HandleLeaveRoom()] leave room && not delete room ");
+            }
+            Console.WriteLine("[fe_handler][HandleLeaveRoom()] finish");
+
+        }// end method 
 
         /*
          * Handle Join Room
@@ -430,14 +465,19 @@ namespace LunkerRedis.src
          */
         public void HandleChat(int bodyLength)
         {
-            // data: user id, roomNo; 
+            // data: user id
             Console.WriteLine("[fe_handler][HandleChat] start");
             FBChatRequestBody body = (FBChatRequestBody) Parser.Read(peer, bodyLength, typeof(FBChatRequestBody));
 
             //string key = "chatting:ranking";
             string id = new string(body.Id).Split('\0')[0];// null character 
 
-            redis.AddChat(id);
+            //redis.Get
+            bool isDummy = redis.GetUserType(id);
+            if (isDummy)
+                return;
+            else
+                redis.AddChat(id);
 
 
             Console.WriteLine("[fe_handler][HandleChat] finish");

@@ -25,10 +25,10 @@ namespace TestClient
         }
         public static void Test()
         {
+            /*
+             * 
             Console.Write("메세지 입력 : ");
             string content = Console.ReadLine();
-
-
 
             content += '\0';
             if (content.Contains('\0'))
@@ -60,15 +60,8 @@ namespace TestClient
                 Console.WriteLine("여ㅑㄴ결x");
 
             peer.Send(Parser.StructureToByte(header));
-
-            //
-            //
-            //
-            // 수정!
-            //peer.Send(Parser.StructureToByte(message));
-            //peer.Send(contentArr);
-
             Console.WriteLine("전송완료");
+            */
         }
     }
 }

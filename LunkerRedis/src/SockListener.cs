@@ -82,9 +82,8 @@ namespace LunkerRedis.src
             //Listener.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.);
             try
             {
-
                 listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                host = new IPEndPoint(IPAddress.Parse(IP), PORT);
+                host = new IPEndPoint(IPAddress.Any, PORT);
                 listener.Bind(host);
                 return listener.IsBound;
             }

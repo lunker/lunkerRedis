@@ -11,7 +11,16 @@ namespace LunkerRedis.src.Utils
 {
     public static class FileLogger
     {
-        public static ILog log = LogManager.GetLogger(MyConst.Logger); 
-        
+        public static ILog logger = null;
+        public static ILog GetLoggerInstance()
+        {
+            if (logger == null)
+            {
+                log4net.Config.XmlConfigurator.Configure(new System.IO.FileInfo(MyConst.LoggerConfigPath));
+                logger = LogManager.GetLogger(MyConst.Logger);
+            }
+                
+            return logger;
+        }
     }
 }

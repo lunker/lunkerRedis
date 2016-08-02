@@ -19,11 +19,16 @@ namespace LunkerRedis
 
         static void Main(string[] args)
         {
-            // Set up a simple configuration that logs on the console.
-            log4net.Config.XmlConfigurator.Configure(new System.IO.FileInfo(MyConst.LoggerConfigPath));
 
-            //ILog log = LogManager.GetLogger();
-            //log.Info("Entering application.");
+            /*
+            // Set up a simple configuration that logs on the console.
+           
+
+            ILog log = LogManager.GetLogger(MyConst.Logger);
+            log.Info("Entering application.");
+            */
+            
+
 
             Backend be = new Backend();
             be.Start();
