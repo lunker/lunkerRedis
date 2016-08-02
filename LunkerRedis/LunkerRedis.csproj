@@ -102,6 +102,7 @@
     <Compile Include="src\RedisWorker.cs" />
     <Compile Include="src\SockListener.cs" />
     <Compile Include="src\Utils\FENameGenerator.cs" />
+    <Compile Include="src\Utils\FileLogger.cs" />
     <Compile Include="src\Utils\HeaderFactory.cs" />
     <Compile Include="src\Utils\ChatRoomNumberGenerator.cs" />
     <Compile Include="src\Utils\Parser.cs" />
