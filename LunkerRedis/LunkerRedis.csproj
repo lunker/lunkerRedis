@@ -92,7 +92,6 @@
     <Compile Include="src\Frame\FE-BE\FBSignupRequestBody.cs" />
     <Compile Include="src\Frame\FE-BE\FBSignupResponseBody.cs" />
     <Compile Include="src\Frame\FE-BE\FEInfo.cs" />
-    <Compile Include="src\Frame\Header.cs" />
     <Compile Include="src\Frame\Schema\User.cs" />
     <Compile Include="src\FrontendHandler.cs" />
     <Compile Include="Program.cs" />
@@ -125,11 +124,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="config\" />
     <Folder Include="dist\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Logconfig.xml" />
+    <Content Include="config\Logconfig.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

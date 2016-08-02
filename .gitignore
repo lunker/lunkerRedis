@@ -1,33 +1,24 @@
-<<<<<<< HEAD
-=======
 
-
->>>>>>> c23fc1ecde8022253698142428496853a97cf840
 #user-specific files
 *.suo
 *.user
 *.sln.docstates
-<<<<<<< HEAD
-=======
 
->>>>>>> c23fc1ecde8022253698142428496853a97cf840
+
 #Build results
-[Dd]ebug/
-[R]elease/
+LunkerRedis/bin/[Dd]ebug/
+*/*/[R]elease/
 x64/
-build/
-[Bb]in/
-[Oo]bj/
-<<<<<<< HEAD
-=======
+*/build/
+*/[Bb]in/
+LunkerRedis/[Oo]bj/*
 
->>>>>>> c23fc1ecde8022253698142428496853a97cf840
+
 #NuGet Packages
 *.nupkg
 **/packages/*
 !**/packages/build/
-<<<<<<< HEAD
-=======
 
 
->>>>>>> c23fc1ecde8022253698142428496853a97cf840
+
+

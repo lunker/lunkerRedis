@@ -6,9 +6,22 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-public struct FEUserStatus
+public struct CBFEUserStatus
 {
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
     char[] feName;
     int num;
+
+
+    public char[] FeName
+    {
+        get { return this.feName; }
+        set { this.feName = value; }
+    }
+
+    public int Num
+    {
+        get { return this.num; }
+        set { this.num = value; }
+    }
 }

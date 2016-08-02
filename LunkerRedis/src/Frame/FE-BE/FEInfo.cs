@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LunkerRedis.src.Frame.FE_BE
 {
-    class FEInfo
+    public class FEInfo
     {
         private string name;
         private string ip;

@@ -8,15 +8,39 @@ using LunkerRedis.src.Utils;
 using LunkerRedis.src.Common;
 using LunkerRedis.src.Frame.FE_BE;
 
+using log4net;
+
 namespace LunkerRedis.src
 {
-    class RedisClient
+    /*****
+     * 
+     * 함수 명 다시 ...
+     */
+    public class RedisClient
     {
         const string REDIS_IP = "192.168.56.102";
         const int REDIS_PORT = 6379;
         private ConnectionMultiplexer _redis = null;
         private IDatabase db = null;
         private ISubscriber pubsub = null;
+
+        private static RedisClient redisInstance = null;
+
+        //private ILog logger = FileLogger.GetLoggerInstance();
+
+        private RedisClient() { }
+
+        public static RedisClient RedisInstance
+        {
+            get{
+                if (redisInstance == null)
+                {
+                    redisInstance = new RedisClient();
+                }
+                return redisInstance;
+            }
+        }
+
 
         public void Start() { }
 
@@ -99,6 +123,12 @@ namespace LunkerRedis.src
             return "";
         }
 
+        public bool DelFEInfo(string ip, int port)
+        {
+            string key = ip + Common.RedisKey.DELIMITER + port;
+            return db.KeyDelete(key);
+        }
+
         /*
          * FE에 해당 채팅방이 있는지 확인 
          * return bool 
@@ -110,17 +140,41 @@ namespace LunkerRedis.src
             return db.SetContains(fe, roomNo);
         }
 
-        
-
         public bool AddFEList(string ip, int port) {
             string key = "fe:list";
             string value = ip + Common.RedisKey.DELIMITER + port;
             return db.SetAdd(key, value);
         }
 
+        /*
+         * return fe ip:port가 들어있는 list 
+         */
+        public object GetFEList()
+        {
+            string KEY = "fe:list";
+            string[] feList = null;
+
+            RedisValue[] result = db.SetMembers(KEY);
+
+            // result => ip:port 임
+            feList = new string[result.Length];
+            for (int idx = 0; idx < result.Length; idx++)
+            {
+                feList[idx] = db.StringGet((string)result[idx]);
+            }
+
+            return feList;
+        }
+        
+        /*
+         * FE list에서 fe 삭제 
+         * parameter : ip:port
+         */
         public bool DelFEList(string ip, int port)
         {
-            return false;
+            string key = "fe:list";
+            string value = ip + Common.RedisKey.DELIMITER + port;
+            return db.SetRemove(key, value);
         }
 
         /*
@@ -134,30 +188,24 @@ namespace LunkerRedis.src
             return db.StringSet(key,value);
         }
 
-        /*
-         *  현재 이용 가능한 FE의 이름 목록 반환 
-         *  return : FE의 이름. fe1, fe2 . . . . 
-         */
-        public object GetFEList()
+        public int GetUserNumIdCache(string key)
         {
-            string KEY = "fe:list";
-            string[] feList = null;
-
-            RedisValue[] result = db.SetMembers(KEY);
-
-            // result => ip:port 임
-            feList = new string[result.Length];
-            for (int idx=0; idx<result.Length; idx++)
-            {
-                feList[idx] = db.StringGet((string) result[idx]);
-            }
-
-            return feList;
+            return (int) db.StringGet(key);
         }
 
-        public string GetFEName(String ip)
+        public bool DelUserNumIdCache(string key)
         {
-            string key = ip;
+            return db.KeyDelete(key);
+        }   
+
+        /*
+         *  현재 이용 가능한 FE의 이름 목록 반환 
+         *  params : FE' ip:port. 
+         *  return : FEName : fe1
+         */
+        public string GetFEName(String feIpPort)
+        {
+            string key = feIpPort;
 
             string feName = db.StringGet(key);
             return feName;
@@ -202,6 +250,41 @@ namespace LunkerRedis.src
             return db.StringGetBit(key, userNumId);
         }
 
+        public bool DelUserLoginKey(string remoteName)
+        {
+            string delimiter = ":";
+            string login = "login";
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(remoteName);
+            sb.Append(delimiter);
+            sb.Append(login);
+
+            string key = sb.ToString();
+
+            return db.KeyDelete(key);
+        }
+
+        public bool SetUserType(string id, bool userType )
+        {
+            int userNumId = GetUserNumIdCache(id);
+
+            return db.StringSetBit(Common.RedisKey.Dummy, userNumId, userType);
+        }
+
+        /*
+         * Return user is dummy 
+         * 
+         * true: dummy
+         * false: normal user
+         */
+        public bool GetUserType(string id)
+        {
+            int userNumId = GetUserNumIdCache(id);
+
+            return db.StringGetBit(Common.RedisKey.Dummy, userNumId);
+        }
+
         /*
          * Create Room 
          * 1) GET USER NUM_ID FROM CACHE
@@ -212,7 +295,7 @@ namespace LunkerRedis.src
          * 
          * Return : int - Chat Room Number
          */
-        public int CreateChatRoom(string id)
+        public int CreateChatRoom(string remoteName, string id)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -221,6 +304,7 @@ namespace LunkerRedis.src
             int numId = (int) db.StringGet(id);
 
             // 2) user가 들어있는 FE 이름 가져오기 
+            /*
             string FE1 = "fe1";
             string FE2 = "fe2";
             string FEName = "";
@@ -233,45 +317,132 @@ namespace LunkerRedis.src
             {
                 FEName = FE2;
             }
+            */
+
 
             // 3) 채팅방 번호 생성 
             int roomNo = ChatRoomNumberGenerator.GenerateRoomNo();
 
+            Console.WriteLine("Generated room number : " + roomNo);
+
+            //logger.Debug("generate room number : " + roomNo);
             // 4) FE의 채팅방 목록에 추가 
 
             string Delimiter = ":";
-            string ChattingRoomList = "chatroomlist";
+            //string ChattingRoomList = "chatroomlist";
             string Key = "";
 
-            sb.Append(FEName);
-            sb.Append(Delimiter);
-            sb.Append(ChattingRoomList);
-        
-            
+            sb.Append(remoteName);
+            sb.Append(Common.RedisKey.DELIMITER);
+            sb.Append(Common.RedisKey.ChattingRoomList);
+
+            Key = sb.ToString();
+         
             if (db.SetAdd(Key, roomNo))
                 return roomNo;
-            else
-                return -1; // 방 번호 중복 시 예외 처리 
+            
+            return roomNo;
 
             // 5) metadata 추가 
             // fe#:room#:count 
             // fe#:room#:user  
-            
-
 
 
         }// end method
 
-
-        public void JoinChatRoom()
+        /*
+         * Add user to Chat room 
+         */
+        public bool AddUserChatRoom(string feName, int roomNo, string id)
         {
+            string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.Room + roomNo + Common.RedisKey.DELIMITER + Common.RedisKey.User;
+            return db.SetAdd(key,id);
+        }
 
+        /*
+         * 채팅방의 유저 목록에서 유저 삭제 
+         */
+        public bool LeaveChatRoom(string feName, int roomNo, string id)
+        {
+            string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.Room + roomNo + Common.RedisKey.DELIMITER + Common.RedisKey.User;
+
+            return db.SetRemove(key, id);
+        }
+
+        public bool DelUserChatRoomKey(string feName, int roomNo)
+        {
+            string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.Room + roomNo + Common.RedisKey.DELIMITER + Common.RedisKey.User;
+            return db.KeyDelete(key);
+        }
+
+        /*
+         * return :방 나간 이후의 남아있는 유저의 수 
+         */
+        public int DecChatRoomCount(string feName, int roomNo)
+        {
+            string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.Room + roomNo + Common.RedisKey.DELIMITER + Common.RedisKey.Count;
+
+            return (int) db.StringDecrement(key,1);
+        }
+
+        public void IncChatRoomCount(string feName, int roomNo)
+        {
+            string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.Room + roomNo + Common.RedisKey.DELIMITER + Common.RedisKey.Count;
+
+            //return (int)db.StringIncrement(key, 1);
+        }
+        
+        public int GetChatRoomCount(string feName, int roomNo)
+        {
+            string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.Room + roomNo + Common.RedisKey.DELIMITER + Common.RedisKey.Count;
+
+            return (int) db.StringGet(key);
+        }
+       
+        public bool DelChattingRoomCountKey(string feName, int roomNo)
+        {
+            string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.Room + roomNo + Common.RedisKey.DELIMITER + Common.RedisKey.Count;
+            return db.KeyDelete(key);
+        }
+
+
+        public bool DelFEChattingRoomListKey(string feName)
+        {
+            string chattingRoomList = "chattingroomlist";
+            string key = feName + Common.RedisKey.DELIMITER + chattingRoomList;
+
+            return db.KeyDelete(key);
+        }
+
+        public object GetFEChattingRoomList(string feName)
+        {
+            int[] roomList = null;
+
+            StringBuilder sb = new StringBuilder();
+            string chattingRoomList = "chattingroomlist";
+
+            sb.Append(feName);
+            sb.Append(Common.RedisKey.DELIMITER);
+            sb.Append(chattingRoomList);
+
+            string key = sb.ToString();
+
+            roomList = new int[db.SetLength(key)];
+
+            RedisValue[] values = db.SetMembers(key);
+
+            for (int idx = 0; idx < values.Length; idx++)
+            {
+                roomList[idx] = (int)values[idx];
+            }
+
+            return roomList;
         }
 
         /*
          * return room number list 
          * return : int[] 
-         */
+         
         public Object ListChatRoom(string fe)
         {
             int[] roomList = null;
@@ -286,7 +457,6 @@ namespace LunkerRedis.src
             sb.Append(chattingRoomList);
             
             string key = sb.ToString();
-            
 
             roomList = new int[db.SetLength(key)];
         
@@ -296,12 +466,18 @@ namespace LunkerRedis.src
             {
                 roomList[idx] = (int) values[idx];
             }
-
             return roomList;
         }
+        */
 
+
+        /*
+         * 더미가 아닌 사용자의 채팅 건수를 저장 
+         */
         public void AddChat(string id)
         {
+
+            db.SortedSetIncrement(Common.RedisKey.Ranking_Chatting, id, 1);
             /*
             //bool result = false;
             db.GetS
@@ -309,10 +485,19 @@ namespace LunkerRedis.src
             //db.StringSet(chat, chat);
             db.SortedSetIncrement(Common.RedisKey.Ranking_Chatting, id, 1);
             */
-
         }// end method
 
-     
+        public object GetChattingRanking(int range)
+        {
+            
+            // user id의 배열 
+            RedisValue[] ranks = db.SortedSetRangeByRank(Common.RedisKey.Ranking_Chatting, 0, range, Order.Descending);
+            return ranks;
+        }
 
+        public void ClearDB()
+        {
+            _redis.GetServer(MyConst.Redis_IP, MyConst.Redis_Port).FlushDatabase();
+        }
     }
 }

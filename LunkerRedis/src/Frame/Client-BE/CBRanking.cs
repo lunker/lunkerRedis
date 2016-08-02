@@ -12,4 +12,16 @@ public struct CBRanking
     char[] id;
 
     int rank;
+
+    public char[] Id
+    {
+        get { return this.id; }
+        set { this.id = value; }
+    }
+
+    public int Rank
+    {
+        get { return this.rank; }
+        set { this.rank = value; }
+    }
 }
