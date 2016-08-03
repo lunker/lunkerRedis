@@ -41,6 +41,12 @@ namespace LunkerRedis.src
             }
         }
 
+<<<<<<< HEAD
+=======
+
+        public void Start() { }
+
+>>>>>>> 33edd59f8de458cd784f43a2f0c119bb99734432
         public ConnectionMultiplexer Redis
         {
             get { return this._redis; }
