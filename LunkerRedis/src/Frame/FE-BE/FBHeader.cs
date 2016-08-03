@@ -39,13 +39,18 @@ public enum FBMessageType : short
     Signup = 120,
 
     Login = 210,
+    Logout = 220,
 
     Room_Create = 310,
     Room_Leave = 320,
     Room_Join = 330,
     Room_List = 340,
 
-    Chat_Count = 410
+    Chat_Count = 410,
+
+    Health_Check = 510,
+
+    Connection_Info = 610
 };
 
 public enum FBMessageState : short

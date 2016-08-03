@@ -76,14 +76,17 @@
     <Compile Include="src\Frame\ChatRoom.cs" />
     <Compile Include="src\Frame\Client-BE\CBHeader.cs" />
     <Compile Include="src\Frame\Client-BE\CBFEUserStatus.cs" />
+    <Compile Include="src\Frame\Client-BE\CBLoginRequestBody.cs" />
     <Compile Include="src\Frame\Client-BE\CBRanking.cs" />
     <Compile Include="src\Frame\Client-FE\CFHeader.cs" />
+    <Compile Include="src\Frame\Client-FE\CFJoinFailBody.cs" />
     <Compile Include="src\Frame\Client-FE\CFLoginResponseBody.cs" />
     <Compile Include="src\Frame\Client-FE\CFRoomRequestBody.cs" />
     <Compile Include="src\Frame\Client-FE\CFRoomResponseBody.cs" />
     <Compile Include="src\Frame\Client-FE\CFSignRequestBody.cs" />
     <Compile Include="src\Frame\Client-FE\ChatBody.cs" />
     <Compile Include="src\Frame\FE-BE\FBChatRequestBody.cs" />
+    <Compile Include="src\Frame\FE-BE\FBConnectionInfo.cs" />
     <Compile Include="src\Frame\FE-BE\FBHeader.cs" />
     <Compile Include="src\Frame\FE-BE\FBLoginRequestBody.cs" />
     <Compile Include="src\Frame\FE-BE\FBLoginResponseBody.cs" />

@@ -8,8 +8,8 @@ namespace LunkerRedis.src.Common
 {
     public static class MyConst
     {
-        public static int FRONTEND_PORT = 15389;
-        public static int CLIENT_PORT = 10852;
+        public static int FRONTEND_PORT = 25389;
+        public static int CLIENT_PORT = 20852;
 
         // 10.100.58.3
         public static string IP = "10.100.58.3";

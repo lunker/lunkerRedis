@@ -22,7 +22,14 @@ namespace LunkerRedis.src.Common
 
         public static string Ranking_Chatting = "ranking:chatting";
 
+        public static string FEServiceInfo = "serviceinfo";
+
         public static string Dummy = "dummy";
 
+    }
+
+    public enum RedisType : int
+    {
+        
     }
 }

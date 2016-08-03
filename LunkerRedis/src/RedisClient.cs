@@ -29,7 +29,6 @@ namespace LunkerRedis.src
         private ILog logger = FileLogger.GetLoggerInstance();
 
         private RedisClient() { }
-
         public static RedisClient RedisInstance
         {
             get{
@@ -41,9 +40,6 @@ namespace LunkerRedis.src
                 return redisInstance;
             }
         }
-
-
-        public void Start() { }
 
         public ConnectionMultiplexer Redis
         {
@@ -104,7 +100,7 @@ namespace LunkerRedis.src
             return fe;
         }
 
-        public string AddFEInfo(string ip, int port)
+        public string AddFEConnectedInfo(string ip, int port)
         {
             string key = ip + Common.RedisKey.DELIMITER + port;
             string feName = "fe" + FENameGenerator.GenerateName();
@@ -119,15 +115,51 @@ namespace LunkerRedis.src
             return db.KeyDelete(key);
         }
 
+        public void AddFEServiceInfo(string feName, string ip, int port)
+        {
+            string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.FEServiceInfo;
+            //string value = ip + Common.RedisKey.DELIMITER + port;
+            HashEntry[] entries = new HashEntry[2];
+            entries[0] = new HashEntry("ip", ip);
+            entries[1] = new HashEntry("port", port);
+
+            db.HashSet(feName, entries);
+        }
+
+        public object GetFEServiceInfo(string feName)
+        {
+            string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.FEServiceInfo;
+
+            HashEntry[] feServiceInfo = db.HashGetAll(key);
+            FEInfo feService = new FEInfo();
+
+            foreach (HashEntry info in feServiceInfo)
+            {
+                if (info.Name.Equals("ip"))
+                    feService.Ip = info.Value;
+                else
+                    feService.Port = (int) info.Value;
+            }
+
+            return feService;
+        }
+
+        public bool DelFEServiceInfo(string feName)
+        {
+            string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.FEServiceInfo;
+            return db.KeyDelete(key);
+        }
+
         /*
          * FE에 해당 채팅방이 있는지 확인 
          * return bool 
          * true: 존재 
          * false: 존재하지 않음 
          */
-        public bool HasChatRoom(string fe, int roomNo)
+        public bool HasChatRoom(string feName, int roomNo)
         {
-            return db.SetContains(fe, roomNo);
+            string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.ChattingRoomList;
+            return db.SetContains(key, roomNo);
         }
 
         public bool AddFEList(string ip, int port) {
@@ -139,7 +171,7 @@ namespace LunkerRedis.src
         /*
          * return fe ip:port가 들어있는 list 
          */
-        public object GetFEList()
+        public object GetFEIpPortList()
         {
             string KEY = "fe:list";
             string[] feList = null;
@@ -150,7 +182,7 @@ namespace LunkerRedis.src
             feList = new string[result.Length];
             for (int idx = 0; idx < result.Length; idx++)
             {
-                feList[idx] = db.StringGet((string)result[idx]);
+                feList[idx] = result[idx];
             }
 
             return feList;

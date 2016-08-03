@@ -41,8 +41,10 @@ namespace LunkerRedis.src
         {
             Console.WriteLine("[sock_listener] Listen . . .");
             listener.Listen(BACK_LOG);
+
             try
             {
+                
                 while (true)
                 {
                     Socket peer = null;

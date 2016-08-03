@@ -17,6 +17,7 @@ namespace LunkerRedis.src
     {
         private Socket peer = null;
         private RedisClient redis = null;
+        private MySQLClient mysql = null;
 
         private ILog logger = FileLogger.GetLoggerInstance();
 
@@ -25,7 +26,7 @@ namespace LunkerRedis.src
         {
             this.peer = handler;
             redis = RedisClient.RedisInstance;
-            //mysql = new MySQLClient();
+            mysql = MySQLClient.Instance;
         }
 
         /**
@@ -37,14 +38,17 @@ namespace LunkerRedis.src
             while (true)
             {
                 // Read Request
-
                 try
                 {
                     CBHeader header;
-                    header = (CBHeader)Parser.Read(peer, (int)ProtocolHeaderLength.FBHeader, typeof(CBHeader));
+                    header = (CBHeader)Parser.Read(peer, (int)ProtocolHeaderLength.CBHeader, typeof(CBHeader));
 
                     switch (header.type)
                     {
+                        case CBMessageType.Login:
+                            HandleLogin(header.Length);
+                            break;
+
                         case CBMessageType.Total_Room_Count:
                             HandleRequestTotalRoomCount(header.Length);
                             break;
@@ -70,14 +74,62 @@ namespace LunkerRedis.src
 
         }//end method
 
+
+        public void HandleLogin(int bodyLength)
+        {
+            //Console.WriteLine("[ce_handler][HandleLogin()] start");
+            logger.Debug("[ce_handler][HandleLogin()] 로그인 시작");
+            // read body
+            CBLoginRequestBody body = (CBLoginRequestBody)Parser.Read(peer, bodyLength, typeof(CBLoginRequestBody));
+
+            string id = new string(body.Id).Split('\0')[0];// null character 
+            string password = new string(body.Password).Split('\0')[0];// null character 
+            CBHeader responseHeader = new CBHeader();
+
+            if (id.Equals(""))
+            {
+                // 유효하지 않은 아이디 입력 
+                responseHeader.Type = CBMessageType.Login;
+                responseHeader.Length = 0;
+                responseHeader.State = CBMessageState.FAIL;
+
+                Parser.Send(peer, responseHeader);
+                logger.Debug("[ce_handler][HandleLogin()] 유효하지 않은 아이디");
+                logger.Debug("[ce_handler][HandleLogin()] 로그인 종료");
+                return;
+            }
+            // 1) db에서 사용자 정보 확인 
+            User result = mysql.SelectUserInfo(id);
+
+            responseHeader.Type = CBMessageType.Login;
+            responseHeader.Length = 0;
+
+            // 로그인 성공 
+            if (!result.Equals(null) && result.Password.Equals(password))
+            {
+                responseHeader.State = CBMessageState.SUCCESS;
+                logger.Debug("[ce_handler][HandleLogin()] 로그인 성공");
+            }
+            else
+            {
+                responseHeader.State = CBMessageState.FAIL;
+                logger.Debug("[ce_handler][HandleLogin()] 로그인 실패");
+            }
+
+            Parser.Send(peer, responseHeader);
+            logger.Debug("[ce_handler][HandleLogin()] 로그인 종료");
+            return;
+
+        }
+
         /*
          * 전체 채팅방 수 조회 
          * 1) 
          */
         public void HandleRequestTotalRoomCount(int bodyLength)
         {
-            logger.Debug("start");
-            string[] feList = (string[]) redis.GetFEList();
+            logger.Debug("[ce_handler][HandleRequestTotalRoomCount()] 전체 채팅방 개수 조회 시작");
+            string[] feList = (string[]) redis.GetFEIpPortList();
             int sum = 0;
             foreach (string fe in feList)
             {
@@ -96,7 +148,8 @@ namespace LunkerRedis.src
 
             Parser.Send(peer, header);
             Parser.Send(peer, data);
-            logger.Debug("finish");
+            logger.Debug("[ce_handler][HandleRequestTotalRoomCount()] 전체 채팅방 개수 조회 종료");
+            return;
         }// end method
 
 
@@ -109,10 +162,11 @@ namespace LunkerRedis.src
          */
         public void HandleFEUserStatus(int bodyLength)
         {
-            logger.Debug("start");
+            logger.Debug("[ce_handler][HandleFEUserStatus()] FE별 사용자수 조회 시작");
+
             CBFEUserStatus[] feStatusList = null;
 
-            string[] feList = (string[]) redis.GetFEList();
+            string[] feList = (string[]) redis.GetFEIpPortList();
             feStatusList = new CBFEUserStatus[feList.Length];
 
             int feUserCountSum = 0;
@@ -147,7 +201,8 @@ namespace LunkerRedis.src
 
             Parser.Send(peer, header); 
             Parser.Send(peer, feStatusList);
-            logger.Debug("finish");
+            logger.Debug("[ce_handler][HandleFEUserStatus()] FE별 사용자수 조회 종료");
+            return;
         }// end method
 
 
@@ -156,7 +211,7 @@ namespace LunkerRedis.src
          */
         public void HandleChatRanking(int bodyLength)
         {
-            logger.Debug("start");
+            logger.Debug("[ce_handler][HandleChatRanking()] 랭킹 조회 시작");
             int maxRange = 10;
 
             string[] results = (string[]) redis.GetChattingRanking(maxRange);
@@ -184,7 +239,8 @@ namespace LunkerRedis.src
 
             // send body
             Parser.Send(peer, ranking);
-            logger.Debug("finish");
+            logger.Debug("[ce_handler][HandleChatRanking()] 랭킹 조회 종료");
+            return;
         }// end method 
 
 
