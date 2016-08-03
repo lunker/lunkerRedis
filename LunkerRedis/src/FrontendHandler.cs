@@ -94,8 +94,21 @@ namespace LunkerRedis.src
          */
         public void HandleRequest()
         {
-            Initialize();
-            SetFEServiceInfo();
+            try
+            {
+                Initialize();
+                SetFEServiceInfo();
+            }
+            catch (SocketException se)
+            {
+                peer.Close();
+                redis = null;
+                mysql = null;
+
+                logger.Debug("[fe_handler] release all resources");
+                return;
+            }
+
 
             while (true)
             {
@@ -482,15 +495,10 @@ namespace LunkerRedis.src
                 logger.Debug("[fe_handler][HandleJoinRoom] 같은 서버에 채팅방이 존재하여 입장!");
                 redis.AddUserChatRoom(remoteName, body.RoomNo, id);
                 redis.IncChatRoomCount(remoteName, body.RoomNo);
-<<<<<<< HEAD
+
 
                 responseHeader.State = FBMessageState.SUCCESS;
-=======
-  
-                header.State = FBMessageState.SUCCESS;
->>>>>>> 33edd59f8de458cd784f43a2f0c119bb99734432
 
-                
                 responseHeader.Length = BitConverter.GetBytes(body.RoomNo).Length;
                 Parser.Send(peer, responseHeader);
                 Parser.Send(peer, BitConverter.GetBytes(body.RoomNo));
@@ -507,16 +515,11 @@ namespace LunkerRedis.src
                  * ㅠ
                  * ㅠ
                  * ㅠ
-<<<<<<< HEAD
                  *  
                  */
                 logger.Debug("[fe_handler][HandleJoinRoom] 다른 서버에 채팅방이 존재함");
-=======
-                 * ㅠ
-                 * ㅠ
-                 *  
-                 */
->>>>>>> 33edd59f8de458cd784f43a2f0c119bb99734432
+
+
                 // 2-2) 채팅방이 다른 서버에 존재,
                 // 다른 FE의 정보를 넘겨준다. 
                 responseHeader.State = FBMessageState.FAIL;
@@ -525,44 +528,35 @@ namespace LunkerRedis.src
                 string[] feIpPortList = (string[])redis.GetFEIpPortList();
 
                 CFJoinFailBody responseBody = new CFJoinFailBody();
-                
+
 
                 // 해당 채팅방이 존재하는 FE의 정보 검색 
-                foreach(string feIpPort in feIpPortList)
+                foreach (string feIpPort in feIpPortList)
                 {
                     string feName = redis.GetFEName(feIpPort);
 
                     // 해당 FE의 IP, PORT 전송 
-                    if(redis.HasChatRoom(feName, body.RoomNo))
+                    if (redis.HasChatRoom(feName, body.RoomNo))
                     {
                         // get ce~fe service url 
                         /*
                          */
                         //FEInfo info = redis.GetFEInfo(feName);
-                        FEInfo info = (FEInfo) redis.GetFEServiceInfo(feName);
+                        FEInfo info = (FEInfo)redis.GetFEServiceInfo(feName);
 
                         responseBody.Ip = info.Ip.ToCharArray();
                         responseBody.Port = info.Port;
                         break;
                     }
-<<<<<<< HEAD
+
                 }// end loop
-             
+
 
                 responseHeader.Length = Marshal.SizeOf(responseBody);
-                
+
                 Parser.Send(peer, responseHeader);
                 Parser.Send(peer, responseBody);
-=======
-                }
-
-                //??????????????????
-                //???????????????????????
->>>>>>> 33edd59f8de458cd784f43a2f0c119bb99734432
-
-            }// end if 
-
-            Console.WriteLine("[fe_handler][HandleJoinRoom] finish");
+            }// end if
         }// end method
 
         /*

@@ -24,20 +24,13 @@ namespace LunkerRedis
 
         static void Main(string[] args)
         {
-<<<<<<< HEAD
             byte[] feIp = new byte[13];
             Array.Copy(Encoding.UTF8.GetBytes("asdasa"), feIp, Encoding.UTF8.GetBytes("asdasa").Length);
             string ip = Encoding.UTF8.GetString(feIp).Split('\0')[0];
-            //Console.WriteLine("ip~!@:"+ip);
+
 
             logger.Debug("--------------------------------------------Start Program-----------------------------------------------------");
-            //Console.WriteLine(Encoding.UTF8.GetBytes("10.100.58.255").Length);
-            //Console.WriteLine(BitConverter.GetBytes(10000).Length);
 
-            // ip : 13
-
-=======
->>>>>>> 33edd59f8de458cd784f43a2f0c119bb99734432
             SetConsoleCtrlHandler(ConsoleCtrlCheck, true);
 
             Backend be = new Backend();
@@ -76,10 +69,9 @@ namespace LunkerRedis
                 case CtrlTypes.CTRL_C_EVENT:
                     isclosing = true;
                     RedisClient.RedisInstance.ClearDB();
-<<<<<<< HEAD
+
                     logger.Debug("--------------------------------------------Exit Program-----------------------------------------------------");
-=======
->>>>>>> 33edd59f8de458cd784f43a2f0c119bb99734432
+
                     Environment.Exit(0);
                     break;
 
@@ -90,15 +82,15 @@ namespace LunkerRedis
 
                 case CtrlTypes.CTRL_CLOSE_EVENT:
                     isclosing = true;
-<<<<<<< HEAD
+
                     RedisClient.RedisInstance.ClearDB();
                     logger.Debug("--------------------------------------------Exit Program-----------------------------------------------------");
                     Environment.Exit(0);
-=======
+
                     //Console.WriteLine("Program being closed!");
                     //logger.Info("Exit Program!!!");
                     RedisClient.RedisInstance.ClearDB();
->>>>>>> 33edd59f8de458cd784f43a2f0c119bb99734432
+
                     break;
 
                 case CtrlTypes.CTRL_LOGOFF_EVENT:
