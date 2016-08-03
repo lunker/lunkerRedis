@@ -79,7 +79,6 @@ namespace LunkerRedis.src
             // read info response
             FBHeader header = (FBHeader)Parser.Read(peer, (int)ProtocolHeaderLength.FBHeader, typeof(FBHeader));
 
-
             /******************
              * 나중에 처리 
              */
@@ -453,7 +452,6 @@ namespace LunkerRedis.src
          */
         public void HandleLeaveRoom(int sessionId, int bodyLength)
         {
-            //Console.WriteLine("[fe_handler][HandleLeaveRoom()] start");
 
             logger.Debug("[fe_handler][HandleLeaveRoom() 채팅방 나가기 시작");
 
@@ -468,18 +466,31 @@ namespace LunkerRedis.src
             // 2) 채팅방의 COUNT 감소 
             int decResult = redis.DecChatRoomCount(id,roomNo);
 
+
+            FBHeader responseHeader = new FBHeader();
+            responseHeader.Type = FBMessageType.Room_Leave;
+            responseHeader.Length = 0;
+            responseHeader.SessionId = sessionId;
+
             if(leaveResult && decResult == 0)
             {
                 // 방삭제 
-                Console.WriteLine("[fe_handler][HandleLeaveRoom()] leave room && delete room ");
+                logger.Debug("[fe_handler][HandleLeaveRoom()] leave room && delete room ");
+                responseHeader.State = FBMessageState.SUCCESS;
             }
-            else if(leaveResult && decResult != 0)
+            else if(leaveResult && decResult != 1)
             {
                 // send result 
-                Console.WriteLine("[fe_handler][HandleLeaveRoom()] leave room && not delete room ");
+                logger.Debug("[fe_handler][HandleLeaveRoom()] leave room && not delete room ");
+                responseHeader.State = FBMessageState.SUCCESS;
             }
-            //Console.WriteLine("[fe_handler][HandleLeaveRoom()] finish");
-            logger.Debug("[fe_handler][HandleLeaveRoom() 채팅방 나가기 시작");
+            else
+            {
+                responseHeader.State = FBMessageState.FAIL;
+            }
+            //logger.Debug("[fe_handler][HandleLeaveRoom() 채팅방 나가기 종료");
+            Parser.Send(peer, responseHeader);
+            logger.Debug("[fe_handler][HandleLeaveRoom() 채팅방 나가기 종료");
 
         }// end method 
 
@@ -493,7 +504,8 @@ namespace LunkerRedis.src
          */
         public void HandleJoinRoom(int sessionId, int bodyLength)
         {
-            Console.WriteLine("[fe_handler][HandleJoinRoom] start");
+            //Console.WriteLine("[fe_handler][HandleJoinRoom] start");
+            logger.Debug("[fe_handler][HandleJoinRoom() 채팅방 입장 시작");
             FBRoomRequestBody body = (FBRoomRequestBody)Parser.Read(peer, bodyLength, typeof(FBRoomRequestBody));
             string id = new string(body.Id).Split('\0')[0];// null character 
 
@@ -569,6 +581,7 @@ namespace LunkerRedis.src
 
                 Parser.Send(peer, responseHeader);
                 Parser.Send(peer, responseBody);
+                logger.Debug("[fe_handler][HandleJoinRoom() 채팅방 입장 종료");
             }// end if
         }// end method
 
