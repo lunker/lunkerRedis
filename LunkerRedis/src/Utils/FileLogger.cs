@@ -12,6 +12,7 @@ namespace LunkerRedis.src.Utils
     public static class FileLogger
     {
         public static ILog logger = null;
+
         public static ILog GetLoggerInstance()
         {
             if (logger == null)

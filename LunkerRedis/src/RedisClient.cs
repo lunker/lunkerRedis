@@ -26,7 +26,7 @@ namespace LunkerRedis.src
 
         private static RedisClient redisInstance = null;
 
-        //private ILog logger = FileLogger.GetLoggerInstance();
+        private ILog logger = FileLogger.GetLoggerInstance();
 
         private RedisClient() { }
 
@@ -36,6 +36,7 @@ namespace LunkerRedis.src
                 if (redisInstance == null)
                 {
                     redisInstance = new RedisClient();
+                    redisInstance.Connect();
                 }
                 return redisInstance;
             }
@@ -43,17 +44,6 @@ namespace LunkerRedis.src
 
 
         public void Start() { }
-
-        /*
-        public static ConnectionMultiplexer GetRedisClient()
-        {
-            if (_redis != null)
-                return _redis;
-
-            _redis = ConnectionMultiplexer.Connect("192.168.56.102:6379" + ",allowAdmin=true,password=ldk201120841");
-            return _redis;
-        }
-        */
 
         public ConnectionMultiplexer Redis
         {
@@ -211,7 +201,7 @@ namespace LunkerRedis.src
             return feName;
         }
 
-        public int GetFERoomNum(string feName)
+        public int GetFETotalChatRoomCount(string feName)
         {
             string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.ChattingRoomList;
             int roomCount = (int)db.SetLength(key);
@@ -293,61 +283,41 @@ namespace LunkerRedis.src
          * 4) FE# 의 채팅방 리스트에 추가 
          * 5) fe#:room#:count metadata 추가 
          * 
+         * -----------
+         * 
+         * 1) 채팅방 번호 생성 
+         * 2) feName:chattingroomlist 에 방번호 추가 
+         * 3) feName:room No:count 생성 
+         * 4) feName:room No:user -> 안만들어도 될듯. 
+         * 
          * Return : int - Chat Room Number
          */
-        public int CreateChatRoom(string remoteName, string id)
+        public int CreateChatRoom(string feName, string id)
         {
             StringBuilder sb = new StringBuilder();
 
-            // 1) get user num_id
-            //db.StringGet();            
             int numId = (int) db.StringGet(id);
-
-            // 2) user가 들어있는 FE 이름 가져오기 
-            /*
-            string FE1 = "fe1";
-            string FE2 = "fe2";
-            string FEName = "";
-
-            if(GetUserLogin(FE1,numId))
-            {
-                FEName = FE1;
-            }
-            else
-            {
-                FEName = FE2;
-            }
-            */
-
 
             // 3) 채팅방 번호 생성 
             int roomNo = ChatRoomNumberGenerator.GenerateRoomNo();
 
             Console.WriteLine("Generated room number : " + roomNo);
-
-            //logger.Debug("generate room number : " + roomNo);
+            
             // 4) FE의 채팅방 목록에 추가 
 
-            string Delimiter = ":";
-            //string ChattingRoomList = "chatroomlist";
-            string Key = "";
-
-            sb.Append(remoteName);
+            sb.Append(feName);
             sb.Append(Common.RedisKey.DELIMITER);
             sb.Append(Common.RedisKey.ChattingRoomList);
 
-            Key = sb.ToString();
-         
-            if (db.SetAdd(Key, roomNo))
-                return roomNo;
-            
-            return roomNo;
+            string key = sb.ToString();
+
+            db.SetAdd(key, roomNo);
 
             // 5) metadata 추가 
             // fe#:room#:count 
-            // fe#:room#:user  
+            NewChatRoomCount(feName, roomNo);
 
-
+            return roomNo;
         }// end method
 
         /*
@@ -375,6 +345,8 @@ namespace LunkerRedis.src
             return db.KeyDelete(key);
         }
 
+
+
         /*
          * return :방 나간 이후의 남아있는 유저의 수 
          */
@@ -385,6 +357,12 @@ namespace LunkerRedis.src
             return (int) db.StringDecrement(key,1);
         }
 
+        public bool NewChatRoomCount(string feName, int roomNo)
+        {
+            string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.Room + roomNo + Common.RedisKey.DELIMITER + Common.RedisKey.Count;
+            return db.StringSet(key,0);
+        }
+        
         public void IncChatRoomCount(string feName, int roomNo)
         {
             string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.Room + roomNo + Common.RedisKey.DELIMITER + Common.RedisKey.Count;
@@ -392,6 +370,13 @@ namespace LunkerRedis.src
             //return (int)db.StringIncrement(key, 1);
         }
         
+
+        /// <summary>
+        /// Get Connected User Count in ChattingRoom 
+        /// </summary>
+        /// <param name="feName">frontend name</param>
+        /// <param name="roomNo">room number</param>
+        /// <returns>total count</returns>
         public int GetChatRoomCount(string feName, int roomNo)
         {
             string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.Room + roomNo + Common.RedisKey.DELIMITER + Common.RedisKey.Count;
@@ -404,7 +389,6 @@ namespace LunkerRedis.src
             string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.Room + roomNo + Common.RedisKey.DELIMITER + Common.RedisKey.Count;
             return db.KeyDelete(key);
         }
-
 
         public bool DelFEChattingRoomListKey(string feName)
         {
@@ -478,26 +462,24 @@ namespace LunkerRedis.src
         {
 
             db.SortedSetIncrement(Common.RedisKey.Ranking_Chatting, id, 1);
-            /*
-            //bool result = false;
-            db.GetS
-            //result = db.SetAdd(chat, chat);
-            //db.StringSet(chat, chat);
-            db.SortedSetIncrement(Common.RedisKey.Ranking_Chatting, id, 1);
-            */
+           
         }// end method
 
         public object GetChattingRanking(int range)
         {
-            
             // user id의 배열 
             RedisValue[] ranks = db.SortedSetRangeByRank(Common.RedisKey.Ranking_Chatting, 0, range, Order.Descending);
             return ranks;
         }
 
+        /*
+         * Clear redis server 
+         */
         public void ClearDB()
         {
-            _redis.GetServer(MyConst.Redis_IP, MyConst.Redis_Port).FlushDatabase();
+            logger.Debug("ClearDB() before exit()");
+            if(Redis!=null)
+                _redis.GetServer(MyConst.Redis_IP, MyConst.Redis_Port).FlushDatabase();
         }
     }
 }

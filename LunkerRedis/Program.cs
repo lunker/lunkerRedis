@@ -24,9 +24,6 @@ namespace LunkerRedis
 
         static void Main(string[] args)
         {
-
-            handler = new ConsoleEventDelegate(ConsoleEventCallback);
-            SetConsoleCtrlHandler(handler, true);
             SetConsoleCtrlHandler(ConsoleCtrlCheck, true);
 
             Backend be = new Backend();
@@ -64,7 +61,7 @@ namespace LunkerRedis
             {
                 case CtrlTypes.CTRL_C_EVENT:
                     isclosing = true;
-                    logger.Info("CTRL+C received!");
+                    RedisClient.RedisInstance.ClearDB();
                     Environment.Exit(0);
                     break;
 
@@ -75,7 +72,9 @@ namespace LunkerRedis
 
                 case CtrlTypes.CTRL_CLOSE_EVENT:
                     isclosing = true;
-                    Console.WriteLine("Program being closed!");
+                    //Console.WriteLine("Program being closed!");
+                    //logger.Info("Exit Program!!!");
+                    RedisClient.RedisInstance.ClearDB();
                     break;
 
                 case CtrlTypes.CTRL_LOGOFF_EVENT:
@@ -83,25 +82,9 @@ namespace LunkerRedis
                     isclosing = true;
                     Console.WriteLine("User is logging off!");
                     break;
-
             }
             return true;
         }
-
-        static bool ConsoleEventCallback(int eventType)
-        {
-            if (eventType == 2)
-            {
-                logger.Info("Exit Program!");
-                Environment.Exit(0);
-            }
-            return false;
-        }
-        static ConsoleEventDelegate handler;   // Keeps it from getting garbage collected
-                                               // Pinvoke
-        private delegate bool ConsoleEventDelegate(int eventType);
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool SetConsoleCtrlHandler(ConsoleEventDelegate callback, bool add);
 
     }
 }
