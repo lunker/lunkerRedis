@@ -20,7 +20,6 @@ namespace LunkerRedis.src.Utils
                 log4net.Config.XmlConfigurator.Configure(new System.IO.FileInfo(MyConst.LoggerConfigPath));
                 logger = LogManager.GetLogger(MyConst.Logger);
             }
-                
             return logger;
         }
     }

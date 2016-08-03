@@ -45,12 +45,13 @@ namespace LunkerRedis.src
 
         public void Initialize()
         {
+            logger.Debug("[fe_handler][initialize] 정보 초기화 시작");
             IPEndPoint ep = (IPEndPoint)peer.RemoteEndPoint;
 
             remoteIP = ep.Address.ToString();
             remotePort = ep.Port;
            
-            logger.Debug("start");
+            //logger.Debug("start");
             // 1) add 서버ip:port ~ FE Name && generate FE Name 
             string feName = redis.AddFEConnectedInfo(remoteIP, remotePort);
             if (!feName.Equals(""))
@@ -59,7 +60,9 @@ namespace LunkerRedis.src
             // 2) 현재 접속 되어 있는 서버들의 정보 저장 
             redis.AddFEList(remoteIP, remotePort);
 
-            Console.WriteLine("[fe_handler][Initialize] finish");
+            //Console.WriteLine("[fe_handler][Initialize] finish");
+            logger.Debug("[fe_handler][initialize] 정보 초기화 종료");
+            logger.Debug("[fe_handler][initialize] " + feName + " 접속됨.");
         }// end method
 
         public void SetFEServiceInfo()
@@ -306,12 +309,22 @@ namespace LunkerRedis.src
                 logger.Debug("[fe_handler][HandleLogin()] 로그인 종료");
                 return;
             }
-            // 1) db에서 사용자 정보 확인 
-            User result = mysql.SelectUserInfo(id);
 
             responseHeader.Type = FBMessageType.Login;
             responseHeader.Length = 0;
             responseHeader.SessionId = sessionId;
+
+            // 1) db에서 사용자 정보 확인 
+            User result = mysql.SelectUserInfo(id);
+
+            if (redis.GetUserLogin(remoteName, result.NumId))
+            {
+                responseHeader.State = FBMessageState.FAIL;
+                Parser.Send(peer, responseHeader);
+                logger.Debug("[fe_handler][HandleLogin()] 중복 로그인");
+                logger.Debug("[fe_handler][HandleLogin()] 로그인 종료");
+            }
+
 
             // 로그인 성공 
             if (!result.Equals(null) && result.Password.Equals(password))
@@ -634,7 +647,7 @@ namespace LunkerRedis.src
         {
             // data: user id
             //Console.WriteLine("[fe_handler][HandleChat] start");
-            logger.Debug("[fe_handler][HandleChat()] start");
+            logger.Debug("[fe_handler][HandleChat()] 채팅 저장 시작");
             FBChatRequestBody body = (FBChatRequestBody) Parser.Read(peer, bodyLength, typeof(FBChatRequestBody));
 
             //string key = "chatting:ranking";
@@ -643,13 +656,18 @@ namespace LunkerRedis.src
             //redis.Get
             bool isDummy = redis.GetUserType(id);
             if (isDummy)
+            {
+                logger.Debug("[fe_handler][HandleChat()] 더미, 채팅 저장 실패");
                 return;
+            }
             else
+            {
                 redis.AddChat(id);
-
+                logger.Debug("[fe_handler][HandleChat()] 정상유저, 채팅 저장 성공");
+            }
 
             //Console.WriteLine("[fe_handler][HandleChat] finish");
-            logger.Debug("[fe_handler][HandleChat()] start");
+            logger.Debug("[fe_handler][HandleChat()] 채팅 저장 종료");
         }
 
         /*
