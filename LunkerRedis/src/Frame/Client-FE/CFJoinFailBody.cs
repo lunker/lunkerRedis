@@ -12,6 +12,12 @@ public struct CFJoinFailBody
     public int port;
 
 
+    public CFJoinFailBody(char[] ip, int port)
+    {
+        this.ip = new char[15];
+        this.port = port;
+    }
+
     public char[] Ip
     {
         get { return this.ip; }

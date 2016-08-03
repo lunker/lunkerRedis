@@ -126,7 +126,7 @@ namespace LunkerRedis.src
             entries[0] = new HashEntry("ip", ip);
             entries[1] = new HashEntry("port", port);
 
-            db.HashSet(feName, entries);
+            db.HashSet(key, entries);
         }
 
         public object GetFEServiceInfo(string feName)
