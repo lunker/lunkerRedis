@@ -15,7 +15,7 @@ namespace LunkerRedis.src
 {
     public class MySQLClient
     {
-        private ILog log = LogManager.GetLogger(MyConst.Logger);
+        private ILog logger = LogManager.GetLogger(MyConst.Logger);
         private MySqlConnection conn = null;
 
         private MySQLClient() { }
@@ -34,10 +34,31 @@ namespace LunkerRedis.src
             }
         }
 
+        public void Release()
+        {
+            conn.Close();
+            conn.Dispose();
+            conn = null;
+        }
+
+        public bool Ping()
+        {
+            if (conn.Ping())
+            {
+                logger.Debug("[MySQL][Ping()] connection true : alive");
+                return true;
+            }
+            else
+            {
+                logger.Debug("[MySQL][Ping()] connection false : die");
+                return false;
+            }
+        }
+
         public void Connect()
         {
             string config = "";
-            config = "server=192.168.56.190;uid=lunker;pwd=dongqlee;database=chatting";
+            config = "server=192.168.56.190;uid=lunker;pwd=dongqlee;database=chatting;ConnectionTimeout=600"; // 10minute
 
             try
             {
@@ -58,6 +79,10 @@ namespace LunkerRedis.src
          */
         public bool CheckIdDup(string id)
         {
+
+            if (!Ping())
+                Connect();
+
             StringBuilder sb = new StringBuilder();
             sb.Append("SELECT * FROM USER ");
             sb.Append("WHERE id=");
@@ -87,7 +112,11 @@ namespace LunkerRedis.src
          */
         public bool CreateUser(string id, string password, bool isDummy)
         {
-            log.Info("[MySQL][CreateUser()] start");            
+
+            if (!Ping())
+                Connect();
+
+            logger.Info("[MySQL][CreateUser()] start");            
             int result = 0;
             StringBuilder sb = new StringBuilder();
             sb.Append("INSERT INTO USER (ID, PASSWORD, DUMMY, REG_DATE ) VALUES ");
@@ -110,6 +139,10 @@ namespace LunkerRedis.src
          */
         public int SelectUserNumId(string id)
         {
+
+            if (!Ping())
+                Connect();
+
             int numId = 0;
 
             // GENERATE QUERY
@@ -133,6 +166,10 @@ namespace LunkerRedis.src
          */
         public User SelectUserInfo(string id)
         {
+
+            if (!Ping())
+                Connect();
+
             User user = new User();
             // GENERATE QUERY
             StringBuilder sb = new StringBuilder();

@@ -13,6 +13,7 @@ using LunkerRedis.src.Common;
 using LunkerRedis.src.Frame;
 
 using LunkerRedis.src.Frame.FE_BE;
+using System.Timers;
 
 namespace LunkerRedis.src
 {
@@ -22,8 +23,12 @@ namespace LunkerRedis.src
         private RedisClient redis = null;
         private MySQLClient mysql = null;
         private string remoteIP = "";
+
+        private int remoteServicePort = 0;
         private int remotePort = 0;
         private string remoteName = "";
+
+        private bool healthChecked = false;
 
         private ILog logger = FileLogger.GetLoggerInstance();
 
@@ -88,6 +93,7 @@ namespace LunkerRedis.src
 
             redis.AddFEServiceInfo(remoteName, ip, port);
 
+            remoteServicePort = port;
             logger.Debug($"[fe_handler][{remoteName}] real fe info {ip} : {port}");
         }
 
@@ -107,10 +113,9 @@ namespace LunkerRedis.src
                 redis = null;
                 mysql = null;
 
-                logger.Debug($"[fe_handler][{remoteName}] release all resources");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}] release all resources");
                 return;
             }
-
 
             while (true)
             {
@@ -170,14 +175,16 @@ namespace LunkerRedis.src
                 catch (SocketException se)
                 {
                     //Console.WriteLine("[fe_handler][HandleRequest()] disconnected . . .");
-                    logger.Debug($"[fe_handler][{remoteName}][HandleRequest()] disconnected");
+                    logger.Debug($"[fe_handler][HandleRequest()][{remoteName}][{remoteServicePort}] disconnected");
                     peer.Close();
 
                     HandleClear();
-                    redis = null;
-                    mysql = null;
+                  
 
-                    logger.Debug($"[fe_handler][{remoteName}] release all resources");
+                    redis.Release();
+                    mysql.Release();
+
+                    logger.Debug($"[fe_handler][HandleRequest()][{remoteName}][{remoteServicePort}] release all resources");
                     return;
                 }
             }// end loop 
@@ -187,18 +194,25 @@ namespace LunkerRedis.src
 
         public void HandleHealthCheck()
         {
-            logger.Debug("[fe_handler][HandleHealthCheck()] start");
-            FBHeader header = (FBHeader) Parser.Read(peer, (int)ProtocolHeaderLength.FBHeader, typeof(FBHeader) );
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleHealthCheck()] start");
 
+            FBHeader header = new FBHeader();
+            header.Length = 0;
+            header.Type = FBMessageType.Health_Check;
+            header.State = FBMessageState.SUCCESS;
 
+            //healthChecked = !healthChecked;
+            //Timer timer = new Timer(); 
 
-            logger.Debug("[fe_handler][HandleHealthCheck()] finish");
+            Parser.Send(peer, header);
+
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleHealthCheck()] finish");
             return;
         }
 
         public void HandleCheckID(int sessionId, int bodyLength)
         {
-            logger.Debug("[fe_handler][HandleHealthCheck()] 아이디 중복 체크 시작");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleHealthCheck()] 아이디 중복 체크 시작");
             FBLoginRequestBody body = (FBLoginRequestBody)Parser.Read(peer, bodyLength, typeof(FBLoginRequestBody));
 
             string id = new string(body.Id).Split('\0')[0];// null character 
@@ -215,20 +229,20 @@ namespace LunkerRedis.src
             if (!result)
             {
                 //Console.WriteLine("[fe_handler][HandleCheckID] result: fail");
-                logger.Debug("[fe_handler][HandleHealthCheck()] 아이디 중복 아님");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleHealthCheck()] 아이디 중복 아님");
                 header.State = FBMessageState.SUCCESS;
             }
             else
             {
                 //Console.WriteLine("[fe_handler][HandleCheckID] result: true");
-                logger.Debug("[fe_handler][HandleHealthCheck()] 아이디 중복임");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleHealthCheck()] 아이디 중복임");
                 header.State = FBMessageState.FAIL;
             }
             
             Parser.Send(peer, header);
             //Console.WriteLine("[fe_handler][HandleCheckID] finish");
 
-            logger.Debug("[fe_handler][HandleHealthCheck()] 아이디 중복 체크 종료");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleHealthCheck()] 아이디 중복 체크 종료");
             return;
         }// end method 
 
@@ -240,7 +254,7 @@ namespace LunkerRedis.src
         public void HandleCreateUser(int sessionId, int bodyLength)
         {
             //Console.WriteLine("[fe_handler][HandleCreateUser] finish");
-            logger.Debug("[fe_handler][HandleCreateUser()] 회원가입 시작");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleCreateUser()] 회원가입 시작");
 
             FBSignupRequestBody body = (FBSignupRequestBody)Parser.Read(peer, bodyLength, typeof(FBSignupRequestBody));
 
@@ -261,19 +275,19 @@ namespace LunkerRedis.src
             if (result)
             {
                 //Console.WriteLine("[fe_handler][HandleCreateUser] result: true");
-                logger.Debug("[fe_handler][HandleCreateUser()] 회원가입 성공");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleCreateUser()] 회원가입 성공");
 
                 header.State = FBMessageState.SUCCESS;
             }
             else
             {
                 //Console.WriteLine("[fe_handler][HandleCreateUser] result: fail");
-                logger.Debug("[fe_handler][HandleCreateUser()] 회원가입 실패");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleCreateUser()] 회원가입 실패");
                 header.State = FBMessageState.FAIL;
             }
             //Console.WriteLine("[fe_handler][HandleCreateUser] finish");
             Parser.Send(peer, header);
-            logger.Debug("[fe_handler][HandleCreateUser()] 회원가입 시작");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleCreateUser()] 회원가입 시작");
             return; 
         }
         
@@ -287,7 +301,7 @@ namespace LunkerRedis.src
         public void HandleLogin(int sessionId, int bodyLength)
         {
             //Console.WriteLine("[fe_handler][HandleLogin()] start");
-            logger.Debug("[fe_handler][HandleLogin()] 로그인 시작");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 로그인 시작");
             // read body
             FBLoginRequestBody body = (FBLoginRequestBody)Parser.Read(peer, bodyLength, typeof(FBLoginRequestBody));
 
@@ -304,8 +318,8 @@ namespace LunkerRedis.src
                 responseHeader.State = FBMessageState.FAIL;
 
                 Parser.Send(peer, responseHeader);
-                logger.Debug("[fe_handler][HandleLogin()] 유효하지 않은 아이디");
-                logger.Debug("[fe_handler][HandleLogin()] 로그인 종료");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 유효하지 않은 아이디");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 로그인 종료");
                 return;
             }
             // 1) db에서 사용자 정보 확인 
@@ -315,6 +329,11 @@ namespace LunkerRedis.src
             responseHeader.Length = 0;
             responseHeader.SessionId = sessionId;
 
+
+            // 다른 서버에 유저가 접속되어 있는지 확인.
+            
+
+
             // 로그인 성공 
             if (!result.Equals(null) && result.Password.Equals(password))
             {
@@ -322,6 +341,28 @@ namespace LunkerRedis.src
 
                 // 2) cache user info 
                 redis.AddUserNumIdCache(result.Id, result.NumId);
+
+                string[] ipPortList = (string[])redis.GetFEIpPortList();
+                foreach (string ipPort in ipPortList)
+                {
+                    string feName = redis.GetFEName(ipPort);
+                    if(redis.GetUserLogin(feName, result.NumId))
+                    {
+                        // login fail
+                        // 다른 서버에 접속되어 있음.
+                        responseHeader.State = FBMessageState.FAIL;
+
+                        // send result : header
+                        Parser.Send(peer, responseHeader);
+                        logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 다른 서버에 해당 유저 들어가있음.");
+                        logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 로그인 실패");
+                    }
+                        
+
+
+                }
+
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}] login bit set result : " + redis.GetUserLogin(remoteName, result.NumId));
 
                 // 3) 로그인 여부 저장
                 redis.SetUserLogin(remoteName, result.NumId, MyConst.LOGINED);
@@ -338,7 +379,7 @@ namespace LunkerRedis.src
 
                 Parser.Send(peer, responseHeader);
                 Parser.Send(peer, response);
-                logger.Debug("[fe_handler][HandleLogin()] 로그인 성공");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 로그인 성공");
 
             }
             else
@@ -347,9 +388,9 @@ namespace LunkerRedis.src
 
                 // send result : header
                 Parser.Send(peer, responseHeader);
-                logger.Debug("[fe_handler][HandleLogin()] 로그인 실패");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 로그인 실패");
             }
-            logger.Debug("[fe_handler][HandleLogin()] 로그인 종료");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 로그인 종료");
             return;
         }
 
@@ -362,7 +403,7 @@ namespace LunkerRedis.src
         public void HandleLogout(int sessionId, int bodyLength)
         {
             //logger.Debug("[fe_handler][HandleLogout() start");
-            logger.Debug("[fe_handler][HandleLogout()] 로그아웃 시작");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogout()] 로그아웃 시작");
             FBLoginRequestBody body = (FBLoginRequestBody)Parser.Read(peer, bodyLength, typeof(FBLoginRequestBody));
             string id = new string(body.Id).Split('\0')[0];// null character 
 
@@ -375,19 +416,19 @@ namespace LunkerRedis.src
 
             if (redis.SetUserLogin(remoteName, userNumId, MyConst.LOGOUT))
             {
-                logger.Debug("[fe_handler][HandleLogout() logout success");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogout() logout success");
                 responseHeader.State = FBMessageState.SUCCESS;
             }
             else
             {
-                logger.Debug("[fe_handler][HandleLogout() logout fail");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogout() logout fail");
                 responseHeader.State = FBMessageState.FAIL;
             }
                 
 
             Parser.Send(peer, responseHeader);
 
-            logger.Debug("[fe_handler][HandleLogout()] 로그아웃 종료");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogout()] 로그아웃 종료");
             return;
         }
 
@@ -402,13 +443,14 @@ namespace LunkerRedis.src
             // read request body 
             if (bodyLength != 0)
             {
-                logger.Debug("[fe_handler][HandleCreateChatRoom() 채팅방 생성 시작");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleCreateChatRoom() 채팅방 생성 시작");
 
 
                 FBRoomRequestBody body = (FBRoomRequestBody)Parser.Read(peer, bodyLength, typeof(FBRoomRequestBody));
                 string id = new string(body.Id).Split('\0')[0];// null character 
                 int result = redis.CreateChatRoom(remoteName,id);
-                Console.WriteLine("[fe_handler][HandleCreateChatRoom()] 생성된 채팅방 번호 : " + result);
+                //Console.WriteLine("[fe_handler][HandleCreateChatRoom()] 생성된 채팅방 번호 : " + result);
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleCreateChatRoom()] 생성된 채팅방 번호 : {result}");
                 // header
                 FBHeader header = new FBHeader();
                 header.Type = FBMessageType.Room_Create;
@@ -422,7 +464,7 @@ namespace LunkerRedis.src
                 Parser.Send(peer, BitConverter.GetBytes(result));
             }
 
-            logger.Debug("[fe_handler][HandleCreateChatRoom() 채팅방 생성종료");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleCreateChatRoom() 채팅방 생성종료");
             return;
 
 
@@ -442,9 +484,7 @@ namespace LunkerRedis.src
          */
         public void HandleLeaveRoom(int sessionId, int bodyLength)
         {
-            //Console.WriteLine("[fe_handler][HandleLeaveRoom()] start");
-
-            logger.Debug($"[fe_handler][{remoteName}][HandleLeaveRoom() 채팅방 나가기 시작");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLeaveRoom() 채팅방 나가기 시작");
 
             // 1) 채팅방에서 유저 삭제 
             FBRoomRequestBody body = (FBRoomRequestBody)Parser.Read(peer, bodyLength, typeof(FBRoomRequestBody));
@@ -452,23 +492,12 @@ namespace LunkerRedis.src
             int roomNo = body.RoomNo;
 
 
+            // 2) 채팅방의 user 나가기.
             bool leaveResult = redis.LeaveChatRoom(remoteName, roomNo, id);
 
             // 2) 채팅방의 COUNT 감소 
-            int decResult = redis.DecChatRoomCount(id,roomNo);
-
-            if(leaveResult && decResult == 0)
-            {
-                // 방삭제 
-                //Console.WriteLine("[fe_handler][HandleLeaveRoom()] leave room && delete room ");
-                logger.Debug($"[fe_handler][{remoteName}][HandleLeaveRoom() 채팅방 나가기 시작");
-            }
-            else if(leaveResult && decResult != 0)
-            {
-                // send result 
-                //Console.WriteLine("[fe_handler][HandleLeaveRoom()] leave room && not delete room ");
-                logger.Debug($"[fe_handler][{remoteName}][HandleLeaveRoom() 채팅방 나가기 시작");
-            }
+            // 감소한 이후의 결과가 온다.
+            int decResult = redis.DecChatRoomCount(remoteName, roomNo);
 
             FBHeader responseHeader = new FBHeader();
             responseHeader.Type = FBMessageType.Room_Leave;
@@ -478,24 +507,45 @@ namespace LunkerRedis.src
 
             Parser.Send(peer, responseHeader);
 
-            //logger.Debug("[fe_handler][HandleLeaveRoom() 채팅방 나가기 종료");
-            logger.Debug($"[fe_handler][{remoteName}][HandleLeaveRoom() 채팅방 나가기 종료");
-            return;
+            if (leaveResult && decResult == 0)
+            {
+                // 방삭제 
+                //Console.WriteLine("[fe_handler][HandleLeaveRoom()] leave room && delete room ");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLeaveRoom() 나가기 이후, result == 0");
 
+                redis.DelUserChatRoomKey(remoteName, roomNo);
+                redis.DelChattingRoomCountKey(remoteName, roomNo);
+                redis.DelChattingRoom(remoteName, roomNo);
+
+                // 추가적인 방삭제 완료 헤더 전송 
+                responseHeader.Type = FBMessageType.Room_Delete;
+                responseHeader.Length = BitConverter.GetBytes(roomNo).Length;
+                Parser.Send(peer, responseHeader);
+                
+                Parser.Send(peer,BitConverter.GetBytes(roomNo));
+            }
+            else if(leaveResult && decResult != 0)
+            {
+                // send result 
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLeaveRoom() 나가기 이후, result != 0");
+            }
+
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLeaveRoom() 채팅방 나가기 종료");
+            return;
         }// end method 
 
-        /*
-         * Handle Join Room
-         * 
-         * 1) 입장하려는 방이 같은 FE에 있는지 확인 
-         * 2-1) 같은 방이면 -> 입장 및 성공 
-         * 2-2) 같은 방이 아니면 실패 
-         * 
-         */
+        /// <summary>
+        /// Handle Join Room
+        /// 
+        /// 1) 입장하려는 방이 같은 FE에 있는지 확인 
+        /// 2-1) 같은 방이면 -> 입장 및 성공 
+        /// 2-2) 같은 방이 아니면 실패 
+        /// </summary>
+        /// <param name="sessionId"></param>
+        /// <param name="bodyLength"></param>
         public void HandleJoinRoom(int sessionId, int bodyLength)
         {
-            //Console.WriteLine("[fe_handler][HandleJoinRoom] start");
-            logger.Debug($"[fe_handler][{remoteName}][HandleJoinRoom] start");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleJoinRoom] start");
             FBRoomRequestBody body = (FBRoomRequestBody)Parser.Read(peer, bodyLength, typeof(FBRoomRequestBody));
             string id = new string(body.Id).Split('\0')[0];// null character 
 
@@ -508,7 +558,7 @@ namespace LunkerRedis.src
             // 입장 
             if (redis.HasChatRoom(remoteName, body.RoomNo))
             {
-                logger.Debug($"[fe_handler][{remoteName}][HandleJoinRoom] 같은 서버에 채팅방이 존재하여 입장!");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleJoinRoom] 같은 서버에 채팅방이 존재하여 입장!");
                 redis.AddUserChatRoom(remoteName, body.RoomNo, id);
                 redis.IncChatRoomCount(remoteName, body.RoomNo);
 
@@ -519,7 +569,7 @@ namespace LunkerRedis.src
                 Parser.Send(peer, responseHeader);
                 Parser.Send(peer, BitConverter.GetBytes(body.RoomNo));
 
-                logger.Debug($"[fe_handler][{remoteName}][HandleJoinRoom] 채팅방 입장 종료");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleJoinRoom] 채팅방 입장 종료");
                 return;
             }
             else
@@ -532,7 +582,7 @@ namespace LunkerRedis.src
                  * 제 
                  *  
                  */
-                logger.Debug($"[fe_handler][{remoteName}][HandleJoinRoom] 다른 서버에 채팅방이 존재함");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleJoinRoom] 다른 서버에 채팅방이 존재함");
 
 
                 // 2-2) 채팅방이 다른 서버에 존재,
@@ -576,16 +626,16 @@ namespace LunkerRedis.src
 
                     Parser.Send(peer, responseHeader);
                     Parser.Send(peer, responseBody);
-                    logger.Debug($"[fe_handler][{remoteName}][HandleJoinRoom] 다른 서버에 채팅방이 존재, 종료");
-                    logger.Debug($"[fe_handler][{remoteName}][HandleJoinRoom] 채팅방 입장 종료");
+                    logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleJoinRoom] 다른 서버에 채팅방이 존재, 종료");
+                    logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleJoinRoom] 채팅방 입장 종료");
                 }
                 else
                 {
                     // 없는 채팅방에 입장 시도 
                     responseHeader.Length = 0;
                     Parser.Send(peer, responseHeader);
-                    logger.Debug($"[fe_handler][{remoteName}][HandleJoinRoom] 없는 채팅방에 접속시도, 종료");
-                    logger.Debug($"[fe_handler][{remoteName}][HandleJoinRoom] 채팅방 입장 종료");
+                    logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleJoinRoom] 없는 채팅방에 접속시도, 종료");
+                    logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleJoinRoom] 채팅방 입장 종료");
                 }
             }// end if
         }// end method
@@ -598,7 +648,7 @@ namespace LunkerRedis.src
         public void HandleListRoom(int sessionId, int bodyLength)
         {
             //Console.WriteLine("[fe_handler][HandleListRoom] start");
-            logger.Debug($"[fe_handler][{remoteName}][HandleListRoom] start");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleListRoom] start");
             // 1) 모든 FE의 이름을 가져와야 함. 
             //string feName = redis.GetFEName(remoteIP);
             string[] feIpPortList = (string[]) redis.GetFEIpPortList();
@@ -626,10 +676,10 @@ namespace LunkerRedis.src
             if(data.Length != 0)
             {
                 //Console.WriteLine("[fe_handler][HandleListRoom] data size != 0");
-                logger.Debug($"[fe_handler][{remoteName}][HandleListRoom] case => data size != 0 ");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleListRoom] case => data size != 0 ");
                 foreach (int roomNo in chatRoomList)
                 {
-                    logger.Debug($"[fe_handler][{remoteName}][HandleListRoom] current room number : " + roomNo);
+                    logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleListRoom] current room number : " + roomNo);
                 }
                 header.Length = data.Length;
                 header.Type = FBMessageType.Room_List;
@@ -644,7 +694,7 @@ namespace LunkerRedis.src
             else
             {
                 //Console.WriteLine("[fe_handler][HandleListRoom] data size ==0");
-                logger.Debug($"[fe_handler][{remoteName}][HandleListRoom] case => data size == 0");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleListRoom] case => data size == 0");
                 header.Length = 0;
                 header.Type = FBMessageType.Room_List;
                 header.State = FBMessageState.SUCCESS;
@@ -653,7 +703,7 @@ namespace LunkerRedis.src
                 Parser.Send(peer, header);
             }
             //Console.WriteLine("[fe_handler][HandleListRoom] finish");
-            logger.Debug($"[fe_handler][{remoteName}][HandleListRoom] finish");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleListRoom] finish");
         }
 
         /*
@@ -664,7 +714,7 @@ namespace LunkerRedis.src
             // data: user id
             //Console.WriteLine("[fe_handler][HandleChat] start");
 
-            logger.Debug($"[fe_handler][{remoteName}][HandleChat] 채팅 저장 시작 ");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleChat] 채팅 저장 시작 ");
             //logger.Debug("[fe_handler][HandleChat()] start");
             FBChatRequestBody body = (FBChatRequestBody) Parser.Read(peer, bodyLength, typeof(FBChatRequestBody));
 
@@ -680,7 +730,7 @@ namespace LunkerRedis.src
 
 
             //Console.WriteLine("[fe_handler][HandleChat] finish");
-            logger.Debug($"[fe_handler][{remoteName}][HandleChat] 채팅 저장 끝 ");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleChat] 채팅 저장 끝 ");
         }
 
         /*
@@ -688,7 +738,7 @@ namespace LunkerRedis.src
          */
         public void HandleClear()
         {
-            logger.Debug("[fe_handler][HandleClear()] start");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleClear()] start");
 
             // 1) delete 서버ip:port ~ FE Name && generate FE Name 
             redis.DelFEInfo(remoteIP, remotePort);
@@ -718,7 +768,7 @@ namespace LunkerRedis.src
                 // 6) key fe:room#user 삭제 
                 redis.DelUserChatRoomKey(remoteName, roomNo);
             }
-            logger.Debug("[fe_handler][HandleClear()] finish");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleClear()] finish");
         }
 
         public void HandleError()

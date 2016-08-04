@@ -67,7 +67,9 @@ namespace LunkerRedis.src
                 {
                     Console.WriteLine("error!!!!!!!!!!!!!!!!!!!!!!");
                     peer.Close();
-                    logger.Debug("close handler");
+                    redis.Release();
+                    mysql.Release();
+                    logger.Debug("[ce_handler][HandleRequest()] 전체 채팅방 개수 조회 종료");
                     return;
                 }
             }//end loop

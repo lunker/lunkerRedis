@@ -130,6 +130,8 @@
     <Folder Include="dist\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="config\RedisConfig.xml" />
+    <Content Include="config\MySQLConfig.xml" />
     <Content Include="config\Logconfig.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
