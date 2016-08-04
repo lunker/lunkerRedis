@@ -263,8 +263,10 @@ namespace LunkerRedis.src
             sb.Append(login);
 
             string key = sb.ToString();
-            
-            return db.StringSetBit(key, userNumId, state);
+            bool result = db.StringSetBit(key, userNumId, state);
+            logger.Debug($"[Redis][SetUserLogin()] result : {result}"); // 이전에 저장되어 있던게 반환된다.
+
+            return result;
         }
 
 

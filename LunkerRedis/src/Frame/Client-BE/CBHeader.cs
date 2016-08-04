@@ -32,8 +32,9 @@ public enum CBMessageType : short
     Total_Room_Count = 110,
     FE_User_Status = 210,
     Chat_Ranking = 310,
-    Login = 410
-    
+    Login = 410,
+    Health_Check = 510
+
 };
 
 public enum CBMessageState : short

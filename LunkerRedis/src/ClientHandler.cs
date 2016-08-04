@@ -10,6 +10,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using log4net;
+using System.Timers;
+using System.Threading;
 
 namespace LunkerRedis.src
 {
@@ -21,6 +23,10 @@ namespace LunkerRedis.src
 
         private ILog logger = FileLogger.GetLoggerInstance();
 
+        private bool threadState = MyConst.Run;
+        private int healthCount = 0;
+
+
         public ClientHandler() { }
         public ClientHandler(Socket handler)
         {
@@ -29,13 +35,47 @@ namespace LunkerRedis.src
             mysql = MySQLClient.Instance;
         }
 
+
+        public void SendHealthCheck(object sender, ElapsedEventArgs e)
+        {
+            Interlocked.Increment(ref healthCount);
+
+            if (healthCount == 3)
+            {
+                // time-out
+                peer.Close();
+                threadState = MyConst.Exit;
+                return;
+            }
+
+            CBHeader header = new CBHeader();
+            header.Type = CBMessageType.Health_Check;
+            header.State = CBMessageState.REQUEST;
+            header.Length = 0;
+
+            Parser.Send(peer, header);
+
+            return;
+        }
+
+        public void HandleHealthCheck()
+        {
+            healthCount = 0;
+        }
+
         /**
          * Monitoring Client의 request 처리 
          */
         public void HandleRequest()
         {
-            logger.Debug("start");
-            while (true)
+            logger.Debug("[ce_handler][HandleRequest()]");
+            // Health Check Start
+            System.Timers.Timer timer = new System.Timers.Timer();
+            timer.Interval = 5 * 1000; // 5초
+            timer.Elapsed += new ElapsedEventHandler(SendHealthCheck);
+            timer.Start();
+
+            while (threadState)
             {
                 // Read Request
                 try
@@ -45,10 +85,13 @@ namespace LunkerRedis.src
 
                     switch (header.type)
                     {
+                        case CBMessageType.Health_Check:
+                            HandleHealthCheck();
+                            break;
+
                         case CBMessageType.Login:
                             HandleLogin(header.Length);
                             break;
-
                         case CBMessageType.Total_Room_Count:
                             HandleRequestTotalRoomCount(header.Length);
                             break;
@@ -67,14 +110,21 @@ namespace LunkerRedis.src
                 {
                     Console.WriteLine("error!!!!!!!!!!!!!!!!!!!!!!");
                     peer.Close();
-                    redis.Release();
-                    mysql.Release();
+                    //redis.Release();
+                    //mysql.Release();
                     logger.Debug("[ce_handler][HandleRequest()] 전체 채팅방 개수 조회 종료");
                     return;
                 }
             }//end loop
 
+
+
+
         }//end method
+
+
+
+
 
 
         public void HandleLogin(int bodyLength)

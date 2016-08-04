@@ -24,11 +24,6 @@ namespace LunkerRedis
 
         static void Main(string[] args)
         {
-            byte[] feIp = new byte[13];
-            Array.Copy(Encoding.UTF8.GetBytes("asdasa"), feIp, Encoding.UTF8.GetBytes("asdasa").Length);
-            string ip = Encoding.UTF8.GetString(feIp).Split('\0')[0];
-
-
             logger.Debug("--------------------------------------------Start Program-----------------------------------------------------");
 
             SetConsoleCtrlHandler(ConsoleCtrlCheck, true);
@@ -68,10 +63,12 @@ namespace LunkerRedis
             {
                 case CtrlTypes.CTRL_C_EVENT:
                     isclosing = true;
+
                     RedisClient.RedisInstance.ClearDB();
+                    RedisClient.RedisInstance.Release();
+                    MySQLClient.Instance.Release();
 
                     logger.Debug("--------------------------------------------Exit Program-----------------------------------------------------");
-
                     Environment.Exit(0);
                     break;
 
@@ -84,13 +81,11 @@ namespace LunkerRedis
                     isclosing = true;
 
                     RedisClient.RedisInstance.ClearDB();
+                    RedisClient.RedisInstance.Release();
+                    MySQLClient.Instance.Release();
+
                     logger.Debug("--------------------------------------------Exit Program-----------------------------------------------------");
                     Environment.Exit(0);
-
-                    //Console.WriteLine("Program being closed!");
-                    //logger.Info("Exit Program!!!");
-                    RedisClient.RedisInstance.ClearDB();
-
                     break;
 
                 case CtrlTypes.CTRL_LOGOFF_EVENT:

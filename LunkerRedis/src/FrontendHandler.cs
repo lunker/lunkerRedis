@@ -181,8 +181,8 @@ namespace LunkerRedis.src
                     HandleClear();
                   
 
-                    redis.Release();
-                    mysql.Release();
+                    //redis.Release();
+                    //mysql.Release();
 
                     logger.Debug($"[fe_handler][HandleRequest()][{remoteName}][{remoteServicePort}] release all resources");
                     return;
@@ -212,7 +212,7 @@ namespace LunkerRedis.src
 
         public void HandleCheckID(int sessionId, int bodyLength)
         {
-            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleHealthCheck()] 아이디 중복 체크 시작");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleCheckID()] 아이디 중복 체크 시작");
             FBLoginRequestBody body = (FBLoginRequestBody)Parser.Read(peer, bodyLength, typeof(FBLoginRequestBody));
 
             string id = new string(body.Id).Split('\0')[0];// null character 
@@ -229,20 +229,20 @@ namespace LunkerRedis.src
             if (!result)
             {
                 //Console.WriteLine("[fe_handler][HandleCheckID] result: fail");
-                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleHealthCheck()] 아이디 중복 아님");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleCheckID()] 아이디 중복 아님");
                 header.State = FBMessageState.SUCCESS;
             }
             else
             {
                 //Console.WriteLine("[fe_handler][HandleCheckID] result: true");
-                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleHealthCheck()] 아이디 중복임");
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleCheckID()] 아이디 중복임");
                 header.State = FBMessageState.FAIL;
             }
             
             Parser.Send(peer, header);
             //Console.WriteLine("[fe_handler][HandleCheckID] finish");
 
-            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleHealthCheck()] 아이디 중복 체크 종료");
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleCheckID()] 아이디 중복 체크 종료");
             return;
         }// end method 
 
@@ -342,6 +342,8 @@ namespace LunkerRedis.src
                 // 2) cache user info 
                 redis.AddUserNumIdCache(result.Id, result.NumId);
 
+
+
                 string[] ipPortList = (string[])redis.GetFEIpPortList();
                 foreach (string ipPort in ipPortList)
                 {
@@ -356,22 +358,25 @@ namespace LunkerRedis.src
                         Parser.Send(peer, responseHeader);
                         logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 다른 서버에 해당 유저 들어가있음.");
                         logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 로그인 실패");
+                        return;
                     }
-                        
+                }// end loop
 
-
-                }
-
-                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}] login bit set result : " + redis.GetUserLogin(remoteName, result.NumId));
+                
 
                 // 3) 로그인 여부 저장
                 redis.SetUserLogin(remoteName, result.NumId, MyConst.LOGINED);
+                // 저장 여부 확인 
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}] login bit set result : " + redis.GetUserLogin(remoteName, result.NumId));
+
 
                 // 4) set dummy offset
                 if (result.IsDummy)
                     redis.SetUserType(id, MyConst.Dummy);
                 else
                     redis.SetUserType(id, MyConst.User);
+
+
 
                 FBLoginResponseBody response = new FBLoginResponseBody();
                 response.Id = body.Id;
@@ -404,9 +409,10 @@ namespace LunkerRedis.src
         {
             //logger.Debug("[fe_handler][HandleLogout() start");
             logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogout()] 로그아웃 시작");
-            FBLoginRequestBody body = (FBLoginRequestBody)Parser.Read(peer, bodyLength, typeof(FBLoginRequestBody));
-            string id = new string(body.Id).Split('\0')[0];// null character 
 
+            FBLoginRequestBody body = (FBLoginRequestBody)Parser.Read(peer, bodyLength, typeof(FBLoginRequestBody));
+
+            string id = new string(body.Id).Split('\0')[0];// null character 
             int userNumId = redis.GetUserNumIdCache(id);
 
             FBHeader responseHeader = new FBHeader();
@@ -416,11 +422,13 @@ namespace LunkerRedis.src
 
             if (redis.SetUserLogin(remoteName, userNumId, MyConst.LOGOUT))
             {
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogout() result true : ");
                 logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogout() logout success");
                 responseHeader.State = FBMessageState.SUCCESS;
             }
             else
             {
+                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogout() result fail : ");
                 logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogout() logout fail");
                 responseHeader.State = FBMessageState.FAIL;
             }

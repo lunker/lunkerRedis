@@ -31,5 +31,8 @@ namespace LunkerRedis.src.Common
         public static bool User = false;
         public static string LoggerConfigPath = "D:\\workspace\\LunkerRedis\\LunkerRedis\\config\\Logconfig.xml";
         public static string Logger = "Logger";
+
+        public static bool Run = true;
+        public static bool Exit = false;
     }
 }
