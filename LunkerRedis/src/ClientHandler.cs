@@ -53,7 +53,7 @@ namespace LunkerRedis.src
             header.State = CBMessageState.REQUEST;
             header.Length = 0;
 
-            Parser.Send(peer, header);
+            NetworkManager.Send(peer, header);
 
             return;
         }
@@ -81,13 +81,15 @@ namespace LunkerRedis.src
                 try
                 {
                     CBHeader header;
-                    header = (CBHeader)Parser.Read(peer, (int)ProtocolHeaderLength.CBHeader, typeof(CBHeader));
+                    header = (CBHeader)NetworkManager.Read(peer, (int)ProtocolHeaderLength.CBHeader, typeof(CBHeader));
 
                     switch (header.type)
                     {
+                        /*
                         case CBMessageType.Health_Check:
                             HandleHealthCheck();
                             break;
+                        */
 
                         case CBMessageType.Login:
                             HandleLogin(header.Length);
@@ -132,7 +134,7 @@ namespace LunkerRedis.src
             //Console.WriteLine("[ce_handler][HandleLogin()] start");
             logger.Debug("[ce_handler][HandleLogin()] 로그인 시작");
             // read body
-            CBLoginRequestBody body = (CBLoginRequestBody)Parser.Read(peer, bodyLength, typeof(CBLoginRequestBody));
+            CBLoginRequestBody body = (CBLoginRequestBody)NetworkManager.Read(peer, bodyLength, typeof(CBLoginRequestBody));
 
             string id = new string(body.Id).Split('\0')[0];// null character 
             string password = new string(body.Password).Split('\0')[0];// null character 
@@ -145,7 +147,7 @@ namespace LunkerRedis.src
                 responseHeader.Length = 0;
                 responseHeader.State = CBMessageState.FAIL;
 
-                Parser.Send(peer, responseHeader);
+                NetworkManager.Send(peer, responseHeader);
                 logger.Debug("[ce_handler][HandleLogin()] 유효하지 않은 아이디");
                 logger.Debug("[ce_handler][HandleLogin()] 로그인 종료");
                 return;
@@ -168,7 +170,7 @@ namespace LunkerRedis.src
                 logger.Debug("[ce_handler][HandleLogin()] 로그인 실패");
             }
 
-            Parser.Send(peer, responseHeader);
+            NetworkManager.Send(peer, responseHeader);
             logger.Debug("[ce_handler][HandleLogin()] 로그인 종료");
             return;
 
@@ -198,8 +200,8 @@ namespace LunkerRedis.src
 
             header.Length = data.Length;
 
-            Parser.Send(peer, header);
-            Parser.Send(peer, data);
+            NetworkManager.Send(peer, header);
+            NetworkManager.Send(peer, data);
             logger.Debug("[ce_handler][HandleRequestTotalRoomCount()] 전체 채팅방 개수 조회 종료");
             return;
         }// end method
@@ -251,12 +253,11 @@ namespace LunkerRedis.src
             header.State = CBMessageState.SUCCESS;
             header.Length = Marshal.SizeOf(feStatusList);
 
-            Parser.Send(peer, header); 
-            Parser.Send(peer, feStatusList);
+            NetworkManager.Send(peer, header); 
+            NetworkManager.Send(peer, feStatusList);
             logger.Debug("[ce_handler][HandleFEUserStatus()] FE별 사용자수 조회 종료");
             return;
         }// end method
-
 
         /*
          * 1) 그냥 랭킹 조회
@@ -287,10 +288,10 @@ namespace LunkerRedis.src
             header.State = CBMessageState.SUCCESS;
             header.Length = Marshal.SizeOf(ranking);
             // send header
-            Parser.Send(peer, header);
+            NetworkManager.Send(peer, header);
 
             // send body
-            Parser.Send(peer, ranking);
+            NetworkManager.Send(peer, ranking);
             logger.Debug("[ce_handler][HandleChatRanking()] 랭킹 조회 종료");
             return;
         }// end method 

@@ -107,7 +107,7 @@
     <Compile Include="src\Utils\FileLogger.cs" />
     <Compile Include="src\Utils\HeaderFactory.cs" />
     <Compile Include="src\Utils\ChatRoomNumberGenerator.cs" />
-    <Compile Include="src\Utils\Parser.cs" />
+    <Compile Include="src\Utils\NetworkManager.cs" />
     <Compile Include="src\Utils\RedisKeyGenerator.cs" />
   </ItemGroup>
   <ItemGroup>

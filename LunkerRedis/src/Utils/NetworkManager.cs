@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace LunkerRedis.src.Utils
 {
-    public static class Parser
+    public static class NetworkManager
     {
         enum Types : short { Header = 1, Message = 2 };
 
@@ -106,7 +106,7 @@ namespace LunkerRedis.src.Utils
                 ;
             }
 
-            obj = Parser.ByteToStructure(buff, type);
+            obj = NetworkManager.ByteToStructure(buff, type);
 
             return obj;
 
