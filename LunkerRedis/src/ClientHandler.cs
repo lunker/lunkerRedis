@@ -239,12 +239,18 @@ namespace LunkerRedis.src
                 {
                     feUserCountSum += redis.GetChatRoomCount(feName, roomNo);
                 }
+
                 feStatusList[idx] = new CBFEUserStatus();
-                char[] feNameArr = new char[12];
 
-                Array.Copy(feName.ToCharArray(), feNameArr, feName.ToCharArray().Length);
+                char[] ip = new char[15]; // space 할당
+                char[] tmpIp = feList[idx].Split(':')[0].ToCharArray() ; // ip parsing
+                int port = Int32.Parse(feList[idx].Split(':')[1]); // port parsing
 
-                feStatusList[idx].FeName = feNameArr;
+                //Array.Copy(feName.ToCharArray(), feNameArr, feName.ToCharArray().Length);
+                Array.Copy(tmpIp, ip, tmpIp.Length); // copy to space 
+
+                feStatusList[idx].Ip = ip;
+                feStatusList[idx].Port = port;
                 feStatusList[idx].Num = feUserCountSum;
             }// end loop
 
