@@ -18,17 +18,14 @@ namespace LunkerRedis.src.Common
 
         public static int Redis_Port = 6379;
 
-
-        //public static string IP = "127.0.0.1";
-        //public static string IP = "localhost";
-
         public static int HEADER_LENGTH = 4;
-        //public static int LOGINED = 1;
+
         public static bool LOGINED = true;
-        //public static int LOGOUT = 0;
         public static bool LOGOUT = false;
+
         public static bool Dummy = true;
         public static bool User = false;
+
         public static string LoggerConfigPath = "D:\\workspace\\LunkerRedis\\LunkerRedis\\config\\Logconfig.xml";
         public static string Logger = "Logger";
 

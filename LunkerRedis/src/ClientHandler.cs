@@ -213,7 +213,6 @@ namespace LunkerRedis.src
             return;
         }// end method
 
-
         /*
          * FE별 사용자 수 조회 
          * 1) 전체 FE IP:PORT string 가져옴 
@@ -229,8 +228,6 @@ namespace LunkerRedis.src
 
             string[] feList = (string[]) redis.GetFEIpPortList();
             feStatusList = new CBFEUserStatus[feList.Length];
-
-            
 
             for(int idx=0; idx < feList.Length; idx++)
             {
@@ -301,15 +298,16 @@ namespace LunkerRedis.src
 
             CBRanking[] ranking = new CBRanking[maxRange];
 
-            for (int idx = 1; idx <= results.Length; idx++)
+            for (int idx = 0; idx < results.Length; idx++)
             {
                 ranking[idx] = new CBRanking();
                 ranking[idx].Id = new char[12];
 
                 char[] feNameArr = new char[12];
                 //Array.Copy(feName.ToCharArray(), feNameArr, feName.ToCharArray().Length);
+
                 Array.Copy(results[idx].ToCharArray(), ranking[idx].Id, results[idx].ToCharArray().Length); 
-                ranking[idx].Rank = idx;
+                ranking[idx].Rank = idx+1;
             }
 
             logger.Debug("[ce_handler][HandleChatRanking()] 랭킹 조회 결과 : " + results.Length);

@@ -109,7 +109,7 @@ namespace LunkerRedis.src
             }
             return fe;
         }
-
+        
         public string AddFEConnectedInfo(string ip, int port)
         {
             string key = ip + Common.RedisKey.DELIMITER + port;
@@ -341,7 +341,7 @@ namespace LunkerRedis.src
         {
             StringBuilder sb = new StringBuilder();
 
-            int numId = (int) db.StringGet(id);
+            //int numId = (int) db.StringGet(id);
 
             // 3) 채팅방 번호 생성 
             int roomNo = ChatRoomNumberGenerator.GenerateRoomNo();
@@ -488,7 +488,7 @@ namespace LunkerRedis.src
          */
         public void AddChat(string id)
         {
-
+            
             db.SortedSetIncrement(Common.RedisKey.Ranking_Chatting, id, 1);
            
         }// end method

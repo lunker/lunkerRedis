@@ -361,8 +361,6 @@ namespace LunkerRedis.src
 
 
             // 다른 서버에 유저가 접속되어 있는지 확인.
-            
-
 
             // 로그인 성공 
             if (result != null && result.Password.Equals(password))
@@ -455,14 +453,12 @@ namespace LunkerRedis.src
             //  현재 서버에서 사용자가 있는 방 찾기 
             // 방에 접속해 있는 유저가 강제 종료 및 끝내기로 로그아웃을 할 경우,
             // 기존에 접속해 있는 방에 대한 정보를 찾아서 나가기 시도를 한다.
-            //
 
             int enteredRoomNo = redis.GetUserEnteredRoomNo(remoteName, id);
 
             logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogout()] 나가려는 사용자가 들어 있는 방 : ");
             if (enteredRoomNo != -1)
             {
-
                 redis.LeaveChatRoom(remoteName, enteredRoomNo, id);
                 if (redis.DecChatRoomCount(remoteName, enteredRoomNo) == 0)
                 {
@@ -499,6 +495,11 @@ namespace LunkerRedis.src
          * Handle Create Chat room 
          * 
          */
+         /// <summary>
+         /// aswdfdsafsdadsadsadsaf
+         /// </summary>
+         /// <param name="sessionId"></param>
+         /// <param name="bodyLength"></param>
         public void HandleCreateChatRoom(int sessionId, int bodyLength)
         {
             // read request body 
@@ -719,20 +720,25 @@ namespace LunkerRedis.src
              * fe2가 계속 들어가있다.. 접속한 횟수만큼.. ㅠㅠㅠㅠ 
              */
             // 2) fe의 chatting room list 조회 
-            int[] chatRoomList = null;
+            //int[] chatRoomList = null;
+            List<int> chatRoomList = new List<int>();
+            //chatRoomList.To
+
             foreach (string feIpPort in feIpPortList)
             {
                 string feName = redis.GetFEName(feIpPort);
-                if (chatRoomList != null)
-                    chatRoomList.Concat((int[])redis.GetFEChattingRoomList(feName));
-                else
-                    chatRoomList = (int[])redis.GetFEChattingRoomList(feName);
+
+                foreach(int roomNo in (int[])redis.GetFEChattingRoomList(feName))
+                {
+                    chatRoomList.Add(roomNo);
+                }
             }
             
             // 3) create Header
             FBHeader header = new FBHeader();
             header.SessionId = sessionId;
             // generate body data
+
             byte[] data = chatRoomList.SelectMany(BitConverter.GetBytes).ToArray();
 
             if(data.Length != 0)

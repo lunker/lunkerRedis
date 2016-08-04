@@ -187,6 +187,15 @@ namespace LunkerRedis.src
                 DataRow row = ds.Tables[0].Rows[0];
                 user.Id = (string)row["id"];
                 user.Password = (string)row["password"];
+
+                
+                if ( row[3].Equals(1))
+                {
+                    user.IsDummy = true;
+                }
+                else
+                    user.IsDummy = false;
+
             }
             else
             {
