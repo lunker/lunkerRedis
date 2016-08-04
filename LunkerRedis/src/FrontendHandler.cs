@@ -198,7 +198,7 @@ namespace LunkerRedis.src
         {
             logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}] Health Check Timer Start");
             System.Timers.Timer timer = new System.Timers.Timer();
-            timer.Interval = 5 * 1000; // 5초
+            timer.Interval = 60 * 1000; // 5초
             timer.Elapsed += new ElapsedEventHandler(ReceiveHealthCheck);
             timer.Start();
         }
@@ -365,7 +365,7 @@ namespace LunkerRedis.src
 
 
             // 로그인 성공 
-            if (!result.Equals(null) && result.Password.Equals(password))
+            if (result != null && result.Password.Equals(password))
             {
                 responseHeader.State = FBMessageState.SUCCESS;
 
@@ -373,7 +373,7 @@ namespace LunkerRedis.src
                 redis.AddUserNumIdCache(result.Id, result.NumId);
 
 
-
+                /*
                 string[] ipPortList = (string[])redis.GetFEIpPortList();
                 foreach (string ipPort in ipPortList)
                 {
@@ -391,6 +391,7 @@ namespace LunkerRedis.src
                         return;
                     }
                 }// end loop
+                */
 
                 
 
@@ -450,6 +451,29 @@ namespace LunkerRedis.src
             responseHeader.Length = 0;
             responseHeader.SessionId = sessionId;
 
+            //
+            //  현재 서버에서 사용자가 있는 방 찾기 
+            // 방에 접속해 있는 유저가 강제 종료 및 끝내기로 로그아웃을 할 경우,
+            // 기존에 접속해 있는 방에 대한 정보를 찾아서 나가기 시도를 한다.
+            //
+
+            int enteredRoomNo = redis.GetUserEnteredRoomNo(remoteName, id);
+
+            logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogout()] 나가려는 사용자가 들어 있는 방 : ");
+            if (enteredRoomNo != -1)
+            {
+
+                redis.LeaveChatRoom(remoteName, enteredRoomNo, id);
+                if (redis.DecChatRoomCount(remoteName, enteredRoomNo) == 0)
+                {
+                    //방삭제 
+
+                    redis.DelChattingRoom(remoteName, enteredRoomNo);
+                    redis.DelChattingRoomCountKey(remoteName, enteredRoomNo);
+                    redis.DelUserChatRoomKey(remoteName, enteredRoomNo);
+                }
+            }
+
             if (redis.SetUserLogin(remoteName, userNumId, MyConst.LOGOUT))
             {
                 logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogout() result true : ");
@@ -463,7 +487,6 @@ namespace LunkerRedis.src
                 responseHeader.State = FBMessageState.FAIL;
             }
                 
-
             NetworkManager.Send(peer, responseHeader);
 
             logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogout()] 로그아웃 종료");
@@ -591,6 +614,7 @@ namespace LunkerRedis.src
             FBHeader responseHeader = new FBHeader();
             responseHeader.Type = FBMessageType.Room_Join;
             responseHeader.SessionId = sessionId;
+
 
             // 2-1) 채팅방이 같은 서버에 존재.
             // 입장 

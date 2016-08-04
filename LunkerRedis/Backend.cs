@@ -38,6 +38,8 @@ namespace LunkerRedis
 
         public void Initialize()
         {
+
+            
             // connection for FE 
             frontendListener = new SockListener(MyConst.IP,MyConst.FRONTEND_PORT);
             if (frontendListener.Connect())
@@ -49,6 +51,7 @@ namespace LunkerRedis
             fListenerThread.Start();
             Console.WriteLine("[FE_HANDLER] 초기화 완료");
 
+         
             // connection for Monitoring Server
             clientListener = new SockListener(MyConst.IP, MyConst.CLIENT_PORT);
             if(clientListener.Connect())

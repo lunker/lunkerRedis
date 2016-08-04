@@ -367,11 +367,18 @@ namespace LunkerRedis.src
 
         /*
          * Add user to Chat room 
+         * 채팅방에 입장.
          */
         public bool AddUserChatRoom(string feName, int roomNo, string id)
         {
             string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.Room + roomNo + Common.RedisKey.DELIMITER + Common.RedisKey.User;
             return db.SetAdd(key,id);
+        }
+
+        public bool IsUserEnteredChatRoom(string feName, int roomNo, string id)
+        {
+            string key = feName + Common.RedisKey.DELIMITER + Common.RedisKey.Room + roomNo + Common.RedisKey.DELIMITER + Common.RedisKey.User;
+            return db.SetContains(key, id);
         }
 
         /*
@@ -490,7 +497,13 @@ namespace LunkerRedis.src
         {
             // user id의 배열 
             RedisValue[] ranks = db.SortedSetRangeByRank(Common.RedisKey.Ranking_Chatting, 0, range, Order.Descending);
-            return ranks;
+
+            string[] resultList = new string[ranks.Length];
+            for(int idx=0; idx<resultList.Length; idx++)
+            {
+                resultList[idx] = (string) ranks[idx];
+            }
+            return resultList;
         }
 
         /*
@@ -502,5 +515,25 @@ namespace LunkerRedis.src
             if(Redis!=null)
                 _redis.GetServer(MyConst.Redis_IP, MyConst.Redis_Port).FlushDatabase();
         }
+
+
+        public int GetUserEnteredRoomNo(string feName, string id)
+        {
+            //string[] GetFEChattingRoomList(feName);
+
+
+            int[] roomNoList =(int[]) GetFEChattingRoomList(feName);
+
+
+            foreach(int roomNo in roomNoList)
+            {
+                //string key = feName + Common.RedisKey.DELIMITER + ;
+                if (IsUserEnteredChatRoom(feName, roomNo, id))
+                    return roomNo;
+            }
+            return -1;
+            
+        }
+
     }
 }

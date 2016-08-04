@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using log4net;
 using System.Timers;
 using System.Threading;
+using LunkerRedis.src.Frame.FE_BE;
 
 namespace LunkerRedis.src
 {
@@ -70,10 +71,14 @@ namespace LunkerRedis.src
         {
             logger.Debug("[ce_handler][HandleRequest()]");
             // Health Check Start
+
+            /*
             System.Timers.Timer timer = new System.Timers.Timer();
             timer.Interval = 5 * 1000; // 5초
             timer.Elapsed += new ElapsedEventHandler(SendHealthCheck);
             timer.Start();
+            */
+
 
             while (threadState)
             {
@@ -114,7 +119,7 @@ namespace LunkerRedis.src
                     peer.Close();
                     //redis.Release();
                     //mysql.Release();
-                    logger.Debug("[ce_handler][HandleRequest()] 전체 채팅방 개수 조회 종료");
+                    logger.Debug("[ce_handler][HandleRequest()] Client Handler Exit.");
                     return;
                 }
             }//end loop
@@ -192,6 +197,8 @@ namespace LunkerRedis.src
                 sum += redis.GetFETotalChatRoomCount(feName);
             }
 
+            logger.Debug("[ce_handler][HandleRequestTotalRoomCount()] 전체 채팅방 수 :  " + sum);
+
             CBHeader header = new CBHeader();
             header.Type = CBMessageType.Total_Room_Count;
             header.State = CBMessageState.SUCCESS;
@@ -223,10 +230,11 @@ namespace LunkerRedis.src
             string[] feList = (string[]) redis.GetFEIpPortList();
             feStatusList = new CBFEUserStatus[feList.Length];
 
-            int feUserCountSum = 0;
+            
 
             for(int idx=0; idx < feList.Length; idx++)
             {
+                int feUserCountSum = 0;
                 // 2) ip:port -> fe name 조회
                 string feName = redis.GetFEName(feList[idx]);
 
@@ -242,14 +250,17 @@ namespace LunkerRedis.src
 
                 feStatusList[idx] = new CBFEUserStatus();
 
-                char[] ip = new char[15]; // space 할당
-                char[] tmpIp = feList[idx].Split(':')[0].ToCharArray() ; // ip parsing
-                int port = Int32.Parse(feList[idx].Split(':')[1]); // port parsing
+                FEInfo info = (FEInfo) redis.GetFEServiceInfo(feName);
 
-                //Array.Copy(feName.ToCharArray(), feNameArr, feName.ToCharArray().Length);
+                char[] ip = new char[15]; // space 할당
+                char[] tmpIp = info.Ip.ToCharArray() ; // ip parsing
+                int port = info.Port; // port parsing
+
                 Array.Copy(tmpIp, ip, tmpIp.Length); // copy to space 
 
-                feStatusList[idx].Ip = ip;
+                feStatusList[idx].Ip = new char[15];
+                Array.Copy(info.Ip.ToCharArray(), feStatusList[idx].Ip,info.Ip.ToCharArray().Length);
+
                 feStatusList[idx].Port = port;
                 feStatusList[idx].Num = feUserCountSum;
             }// end loop
@@ -257,10 +268,23 @@ namespace LunkerRedis.src
             CBHeader header = new CBHeader();
             header.Type = CBMessageType.FE_User_Status;
             header.State = CBMessageState.SUCCESS;
-            header.Length = Marshal.SizeOf(feStatusList);
 
-            NetworkManager.Send(peer, header); 
-            NetworkManager.Send(peer, feStatusList);
+            logger.Debug("[ce_handler][HandleFEUserStatus()] fe 갯수 : " + feStatusList.Length);
+            
+            byte[] feStatusListByte = NetworkManager.CBFEUserStatusStructureArrayToByte(feStatusList, typeof(CBFEUserStatus));
+            header.Length = feStatusListByte.Length;
+
+
+            if(header.Length == 0)
+            {
+                NetworkManager.Send(peer, header);
+            }
+            else
+            {
+                NetworkManager.Send(peer, header);
+                NetworkManager.Send(peer, feStatusListByte);
+            }
+
             logger.Debug("[ce_handler][HandleFEUserStatus()] FE별 사용자수 조회 종료");
             return;
         }// end method
@@ -288,16 +312,22 @@ namespace LunkerRedis.src
                 ranking[idx].Rank = idx;
             }
 
+            logger.Debug("[ce_handler][HandleChatRanking()] 랭킹 조회 결과 : " + results.Length);
+
+
+            byte[] rankingArr = NetworkManager.CBRankingStructureArrayToByte(ranking, typeof(CBRanking));
             // generate Header
             CBHeader header = new CBHeader();
             header.Type = CBMessageType.Chat_Ranking;
             header.State = CBMessageState.SUCCESS;
-            header.Length = Marshal.SizeOf(ranking);
+            header.Length = rankingArr.Length;
+
             // send header
             NetworkManager.Send(peer, header);
+            if(ranking.Length!=0)
+                // send body
+                NetworkManager.Send(peer, rankingArr);
 
-            // send body
-            NetworkManager.Send(peer, ranking);
             logger.Debug("[ce_handler][HandleChatRanking()] 랭킹 조회 종료");
             return;
         }// end method 
