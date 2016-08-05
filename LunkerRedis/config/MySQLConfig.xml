@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<MySQLConfig>
+  <server>192.168.56.190</server>
+  <uid>lunker</uid>
+  <pwd>dongqlee</pwd>
+  <database>chatting</database>
+  <ConnectionTimeout>600</ConnectionTimeout>
+</MySQLConfig>
+

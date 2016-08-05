@@ -1,0 +1,15 @@
+D:\workspace\LunkerRedis\TestClient\bin\Debug\TestClient.exe.config
+D:\workspace\LunkerRedis\TestClient\bin\Debug\TestClient.exe
+D:\workspace\LunkerRedis\TestClient\bin\Debug\TestClient.pdb
+D:\workspace\LunkerRedis\TestClient\bin\Debug\LunkerRedis.exe
+D:\workspace\LunkerRedis\TestClient\bin\Debug\log4net.dll
+D:\workspace\LunkerRedis\TestClient\bin\Debug\MySql.Data.dll
+D:\workspace\LunkerRedis\TestClient\bin\Debug\StackExchange.Redis.dll
+D:\workspace\LunkerRedis\TestClient\bin\Debug\LunkerRedis.pdb
+D:\workspace\LunkerRedis\TestClient\bin\Debug\log4net.xml
+D:\workspace\LunkerRedis\TestClient\bin\Debug\MySql.Data.xml
+D:\workspace\LunkerRedis\TestClient\bin\Debug\StackExchange.Redis.pdb
+D:\workspace\LunkerRedis\TestClient\bin\Debug\StackExchange.Redis.xml
+D:\workspace\LunkerRedis\TestClient\obj\Debug\TestClient.csprojResolveAssemblyReference.cache
+D:\workspace\LunkerRedis\TestClient\obj\Debug\TestClient.exe
+D:\workspace\LunkerRedis\TestClient\obj\Debug\TestClient.pdb

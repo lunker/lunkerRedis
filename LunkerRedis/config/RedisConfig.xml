@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<RedisConfig>
+  <ip>192.168.56.102</ip>
+  <port>6379</port>
+</RedisConfig>

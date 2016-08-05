@@ -1,0 +1,5 @@
+D:\workspace\lunkerRedis\StarterApp\bin\Debug\StarterApp.exe.config
+D:\workspace\lunkerRedis\StarterApp\bin\Debug\StarterApp.exe
+D:\workspace\lunkerRedis\StarterApp\bin\Debug\StarterApp.pdb
+D:\workspace\lunkerRedis\StarterApp\obj\Debug\StarterApp.exe
+D:\workspace\lunkerRedis\StarterApp\obj\Debug\StarterApp.pdb

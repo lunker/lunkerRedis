@@ -1,0 +1,24 @@
+
+#user-specific files
+*.suo
+*.user
+*.sln.docstates
+
+
+#Build results
+LunkerRedis/bin/[Dd]ebug/
+*/*/[R]elease/
+x64/
+*/build/
+*/[Bb]in/
+LunkerRedis/[Oo]bj/*
+
+
+#NuGet Packages
+*.nupkg
+**/packages/*
+!**/packages/build/
+
+
+
+
