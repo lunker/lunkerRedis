@@ -11,6 +11,9 @@ using LunkerRedis.src.Common;
 using LunkerRedis.src.Frame;
 using LunkerRedis.src.Utils;
 
+using log4net;
+
+
 namespace LunkerRedis.src
 {
 
@@ -20,18 +23,28 @@ namespace LunkerRedis.src
      */ 
     class SockListener
     {
+
+        private ILog logger = FileLogger.GetLoggerInstance();
         private Socket listener = null;
         
         private int PORT = default(int);// host port
         private string IP = default(string); // host ip
 
         private int BACK_LOG = 1000;
+        private bool threadState = MyConst.Run;
+        //private Thread[] frontendHandlerList = null;
+        //private Thread[] clientHandlerList = null;
+        private List<FrontendHandler> frontendHandlerList = null;
+        private List<ClientHandler> clientHandlerList = null;
+
 
         public SockListener() { }
         public SockListener(string ip, int port)
         {
             this.IP = ip;
             this.PORT = port;
+            frontendHandlerList = new List<FrontendHandler>();
+            clientHandlerList = new List<ClientHandler>();
         }
 
         /*
@@ -39,13 +52,12 @@ namespace LunkerRedis.src
          */
         public void Listen()
         {
-            Console.WriteLine("[sock_listener] Listen . . .");
+            //Console.WriteLine("[sock_listener] Listen . . .");
             listener.Listen(BACK_LOG);
 
             try
             {
-                
-                while (true)
+                while (threadState)
                 {
                     Socket peer = null;
                     peer = listener.Accept();
@@ -55,6 +67,7 @@ namespace LunkerRedis.src
                         ClientHandler handler = new ClientHandler(peer);
 
                         Thread clientThread = new Thread(new ThreadStart(handler.HandleRequest));
+                        clientHandlerList.Add(handler);
                         clientThread.Start();
                     }
                     else
@@ -62,16 +75,34 @@ namespace LunkerRedis.src
                         FrontendHandler handler = new FrontendHandler(peer);
                         
                         Thread frontendThread = new Thread(new ThreadStart(handler.HandleRequest));
+                        frontendHandlerList.Add(handler);
                         frontendThread.Start();
                     }
                 }// end while
             }
             catch (SocketException se)
             {
-                Console.WriteLine("[sock_listener] exception . . .");
+                //Console.WriteLine("[sock_listener] exception . . .");
+                return;
             }
         }// end method
         
+        public void RequestStopThread()
+        {
+            logger.Debug("[SockListener][RequestStopThread()] Stop Handler Thread~!");
+            this.threadState = MyConst.Exit;
+
+            foreach (FrontendHandler handler in frontendHandlerList)
+            {
+                handler.HandleStopThread();
+            }
+
+            foreach (ClientHandler handler in clientHandlerList)
+            {
+                handler.HandleStopThread();
+            }
+
+        }
         /*
          * Host' IP-PORT로  socket connect
          * <return> bool 
@@ -91,7 +122,7 @@ namespace LunkerRedis.src
             }
             catch(SocketException se)
             {
-                Console.WriteLine(se.SocketErrorCode);
+                //Console.WriteLine(se.SocketErrorCode);
                 return false;
             }
             catch (ArgumentNullException ane)

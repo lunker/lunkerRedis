@@ -8,15 +8,18 @@ using LunkerRedis.src.Utils;
 
 namespace LunkerRedis.src
 {
+    /// <summary>
+    /// Object Pool for RedisClient 
+    /// </summary>
     public static class RedisClientPool
     {
         private static ILog logger = FileLogger.GetLoggerInstance();
-        private static int poolSize = 10;
+        private static int poolSize = 5;
         private static List<RedisClient> _available = new List<RedisClient>();
         private static List<RedisClient> _inUse = new List<RedisClient>();
 
         /// <summary>
-        /// Generate Pool
+        /// RedisClientPool Static Structor
         /// </summary>
         static RedisClientPool()
         {
@@ -35,9 +38,11 @@ namespace LunkerRedis.src
         /// <returns></returns>
         public static RedisClient GetInstance()
         {
-            logger.Debug("[RedisClientPool] Get Instance");
+            
             lock (_available)
             {
+                logger.Debug("[RedisClientPool] Get Instance");
+
                 if (_available.Count != 0)
                 {
                     RedisClient po = _available[0];
@@ -54,33 +59,55 @@ namespace LunkerRedis.src
             }
          
         }// end method
-    
-        public static void ReleaseObject(RedisClient po)
+
+        /// <summary>
+        /// Release RedisClient Instance
+        /// </summary>
+        /// <param name="obj">RedisClient instance</param>
+        public static void ReleaseObject(RedisClient obj)
         {
-            logger.Debug("[RedisClientPool] Release Instance");
+            
             //CleanUp(po);
             lock (_available)
             {
-                _available.Add(po);
-                _inUse.Remove(po);
+                logger.Debug("[RedisClientPool] Release Instance");
+                _available.Add(obj);
+                _inUse.Remove(obj);
             }
         }
 
+        /// <summary>
+        /// Dispose RedisClient Pool
+        /// </summary>
         public static void Dispose()
         {
             logger.Debug("[RedisClientPool] Clear All Instances");
+            logger.Info("[RedisClientPool] Clear All Instances");
 
-            for (int idx = 0; idx < poolSize; idx++)
+            lock (_available)
             {
-                if (_available.ElementAt(idx) != null)
+                if (_available != null && _available.Count != 0)
                 {
-                    _available.ElementAt(idx).Release();
-                }
-            }
+                    /*
+                    for (int idx = 0; idx < poolSize; idx++)
+                    {
+                        if (_available.ElementAt(idx) != null)
+                        {
+                            _available.ElementAt(idx).Release();
+                        }
+                    }
+                    */
+                    foreach (RedisClient client in _available)
+                    {
+                        client.Release();
+                    }
 
-            _available.Clear();
-            _available = null;
-        }
+                    _available.Clear();
+                    //_available = null;
+
+                }
+            }//end lock
+        }// end method
 
     }
 }

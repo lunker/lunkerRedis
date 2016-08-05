@@ -66,14 +66,16 @@ namespace LunkerRedis.src
             healthCount = 0;
         }
 
+        public void HandleStopThread()
+        {
+            threadState = MyConst.Exit;
+        }
         /**
          * Monitoring Client의 request 처리 
          */
         public void HandleRequest()
         {
             logger.Debug("[ce_handler][HandleRequest()]");
-            // Health Check Start
-
             /*
             System.Timers.Timer timer = new System.Timers.Timer();
             timer.Interval = 5 * 1000; // 5초
@@ -96,7 +98,6 @@ namespace LunkerRedis.src
                             HandleHealthCheck();
                             break;
                         */
-
                         case CBMessageType.Login:
                             HandleLogin(header.Length);
                             break;
@@ -123,19 +124,15 @@ namespace LunkerRedis.src
                     MySQLClientPool.ReleaseObject(mysql);
 
                     logger.Debug("[ce_handler][HandleRequest()] Client Handler Exit.");
-                    return;
+                    break;
                 }
             }//end loop
 
-
-
-
+            RedisClientPool.ReleaseObject(redis);
+            MySQLClientPool.ReleaseObject(mysql);
+            logger.Debug("[ce_handler][HandleRequest()] stop thread.");
+            return;
         }//end method
-
-
-
-
-
 
         public void HandleLogin(int bodyLength)
         {
@@ -238,6 +235,10 @@ namespace LunkerRedis.src
                 // 2) ip:port -> fe name 조회
                 string feName = redis.GetFEName(feList[idx]);
 
+                int feConnectedUserCount = redis.GetUserLoginCount(feName);
+                
+                
+                /*
                 // 3) 해당 fe에 열려있는 채팅방 번호 조회 
                 int[] roomList = (int[]) redis.GetFEChattingRoomList(feName);
 
@@ -247,6 +248,8 @@ namespace LunkerRedis.src
                 {
                     feUserCountSum += redis.GetChatRoomCount(feName, roomNo);
                 }
+
+                */
 
                 feStatusList[idx] = new CBFEUserStatus();
 
@@ -262,7 +265,7 @@ namespace LunkerRedis.src
                 Array.Copy(info.Ip.ToCharArray(), feStatusList[idx].Ip,info.Ip.ToCharArray().Length);
 
                 feStatusList[idx].Port = port;
-                feStatusList[idx].Num = feUserCountSum;
+                feStatusList[idx].Num = feConnectedUserCount;
             }// end loop
 
             CBHeader header = new CBHeader();

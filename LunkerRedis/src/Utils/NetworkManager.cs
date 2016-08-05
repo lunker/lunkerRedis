@@ -122,45 +122,7 @@ namespace LunkerRedis.src.Utils
             int rc = 0;
             byte[] buff = new byte[length];
 
-            /*
-            try
-            {
-                rc = peer.Receive(buff);
-                Console.WriteLine("[PARSER][READ] " + rc);
-
-                
-                if (rc == 0)
-                {
-                    throw new SocketException();
-                }
-                else if (rc > 0)
-                {
-                    ;
-                }
-                else
-                {
-                    ;
-                }
-
-                obj = Parser.ByteToStructure(buff, type);
-
-                return obj;
-            }
-            catch(ArgumentNullException ane)
-            {
-                Console.WriteLine("[PARSER][READ] :" +ane.StackTrace);
-                throw new SocketException();
-                
-            }
-            catch (SocketException se)
-            {
-                Console.WriteLine("[PARSER][READ] " + se.SocketErrorCode);
-                throw new SocketException();
-            }
-            */
-
             rc = peer.Receive(buff);
-            Console.WriteLine("[PARSER][READ] " + rc);
 
             if (rc == 0)
             {
@@ -189,39 +151,6 @@ namespace LunkerRedis.src.Utils
         {
             int rc = 0;
             byte[] buff = new byte[length];
-
-            /*
-            try
-            {
-                rc = peer.Receive(buff);
-
-                if (rc == 0)
-                {
-                    throw new SocketException();
-                }
-                else if (rc > 0)
-                {
-                    ;
-                }
-                else
-                {
-                    ;
-                }
-
-
-                return buff;
-            }
-            catch (ArgumentNullException ane)
-            {
-                Console.WriteLine("[PARSER][READ] :" + ane.StackTrace);
-                throw new SocketException();
-            }
-            catch (SocketException se)
-            {
-                Console.WriteLine("[PARSER][READ] " + se.SocketErrorCode);
-                throw new SocketException();
-            }
-            */
 
             rc = peer.Receive(buff);
 
@@ -260,7 +189,7 @@ namespace LunkerRedis.src.Utils
                 }
 
                 if (rc == 0) {
-                    Console.WriteLine("");
+                    //Console.WriteLine("");
                 }
                 else if(rc > 0)
                 {
@@ -271,7 +200,7 @@ namespace LunkerRedis.src.Utils
 
                 }
 
-                Console.WriteLine("[parser][send()] " + rc + "bytes");
+                //Console.WriteLine("[parser][send()] " + rc + "bytes");
                 return true;
             }
             catch (SocketException se)

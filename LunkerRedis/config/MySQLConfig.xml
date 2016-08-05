@@ -1,12 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<mysql>
+<MySQLConfig>
   <ip>192.168.56.190</ip>
   <uid>lunker</uid>
   <pwd>dongqlee</pwd>
   <database>chatting</database>
   <ConnectionTimeout>600</ConnectionTimeout>
   
-</mysql>
+</MySQLConfig>
 
-
-config = "server=192.168.56.190;uid=lunker;pwd=dongqlee;database=chatting;ConnectionTimeout=600"; 

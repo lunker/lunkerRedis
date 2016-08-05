@@ -1,106 +1,108 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LunkerRedis.src;
 using log4net;
-using log4net.Config;
-using System.Reflection;
 using LunkerRedis.src.Common;
-using System.Windows;
 using LunkerRedis.src.Utils;
-using System.Runtime.InteropServices;
+using System.Xml;
 
 namespace LunkerRedis
 {
-    class Program 
+    class Program
     {
-        // Define a static logger variable so that it references the
-        // Logger instance named "MyApp".
-        //private static readonly ILog log = LogManager.GetLogger("Logger");
         private static ILog logger = FileLogger.GetLoggerInstance();
-        private static bool isclosing = false;
+        private static Backend backendServer = null;
+        private static bool appState = MyConst.Run;
 
         static void Main(string[] args)
         {
-            logger.Debug("\n\n\nn\n\n--------------------------------------------Backend Server-----------------------------------------------------");
+            /*
+            XmlTextReader reader = new XmlTextReader("config\\MySQLConfig.xml");
+            while (reader.Read())
+            {
+                switch (reader.NodeType)
+                {
+                    case XmlNodeType.Element: // The node is an element.
+                        if (reader.Name.Equals("MySQLConfig"))
+                            continue;
+                        Console.Write("<" + reader.Name);
+                        Console.WriteLine(">");
+                        break;
+                    case XmlNodeType.Text: //Display the text in each element.
+                        Console.WriteLine(reader.Name);
+                        break;
+                    case XmlNodeType.EndElement: //Display the end of the element.
+                        if (reader.Name.Equals("MySQLConfig"))
+                            continue;
+                        Console.Write("</" + reader.Name);
+                        Console.WriteLine(">");
+                        break;
+                }
+            }
+            */
+
+
+            XmlTextReader reader = new XmlTextReader("config\\RedisConfig.xml");
+            int index = 0;
+            string ip = "";
+            int port = 0;
+       
+            while (reader.Read())
+            {
+                switch (reader.NodeType)
+                {
+                    case XmlNodeType.Element: // The node is an element.
+                        if (reader.Name.Equals("RedisConfig"))
+                            continue;
+                        break;
+                    case XmlNodeType.Text: //Display the text in each element.
+                        //sb.Append(reader.Value);
+                        if (index == 0)
+                            ip = reader.Value;
+                        else
+                            port = int.Parse(reader.Value);
+
+                        index++;
+                        break;
+                    case XmlNodeType.EndElement: //Display the end of the element.
+                        if (reader.Name.Equals("RedisConfig"))
+                            continue;
+                        break;
+                }
+            }// end while 
+            string config = ip + ":" + port + ",allowAdmin=true";
+            logger.Debug(config);
+            logger.Debug("\n\n\n\n\n--------------------------------------------Backend Server-----------------------------------------------------");
             logger.Debug("--------------------------------------------Start Program-----------------------------------------------------");
 
-            SetConsoleCtrlHandler(ConsoleCtrlCheck, true);
 
-            Backend be = new Backend();
-            be.Start();
-        }// end method
 
-        #region unmanaged
-        // Declare the SetConsoleCtrlHandler function
-        // as external and receiving a delegate.
+            backendServer = new Backend();
+            backendServer.Start();
 
-        [DllImport("Kernel32")]
-        public static extern bool SetConsoleCtrlHandler(HandlerRoutine Handler, bool Add);
-
-        // A delegate type to be used as the handler routine
-        // for SetConsoleCtrlHandler.
-        public delegate bool HandlerRoutine(CtrlTypes CtrlType);
-
-        // An enumerated type for the control messages
-        // sent to the handler routine.
-        public enum CtrlTypes
-        {
-            CTRL_C_EVENT = 0,
-            CTRL_BREAK_EVENT,
-            CTRL_CLOSE_EVENT,
-            CTRL_LOGOFF_EVENT = 5,
-            CTRL_SHUTDOWN_EVENT
-        }
-
-        #endregion
-
-        private static bool ConsoleCtrlCheck(CtrlTypes ctrlType)
-        {
-            // Put your own handler here
-            switch (ctrlType)
+            while (appState)
             {
-                case CtrlTypes.CTRL_C_EVENT:
-                    isclosing = true;
-
-                    //RedisClient.RedisInstance.ClearDB();
-                    //RedisClient.RedisInstance.Release();
+                Console.Write("어플리케이션을 종료하시겠습니까? (y/n) : ");
+                string close = Console.ReadLine();
+                if (close.Equals("y") || close.Equals("Y"))
+                {
+                    backendServer.RequestStopThread();
+                    RedisClientPool.GetInstance().ClearDB();
                     RedisClientPool.Dispose();
                     MySQLClientPool.Dispose();
-                    //MySQLClient.Instance.Release();
+                    appState = MyConst.Exit;
 
+                    Console.Clear();
+                    Console.Write("어플리케이션을 종료중입니다 . . .");
                     logger.Debug("--------------------------------------------Exit Program-----------------------------------------------------");
                     Environment.Exit(0);
-                    break;
-
-                case CtrlTypes.CTRL_BREAK_EVENT:
-                    isclosing = true;
-                    Console.WriteLine("CTRL+BREAK received!");
-                    break;
-
-                case CtrlTypes.CTRL_CLOSE_EVENT:
-                    isclosing = true;
-
-                    //RedisClient.RedisInstance.ClearDB();
-                    //RedisClient.RedisInstance.Release();
-                    RedisClientPool.Dispose();
-                    MySQLClientPool.Dispose();
-                    //MySQLClient.Instance.Release();
-
-                    logger.Debug("--------------------------------------------Exit Program-----------------------------------------------------");
-                    Environment.Exit(0);
-                    break;
-
-                case CtrlTypes.CTRL_LOGOFF_EVENT:
-                case CtrlTypes.CTRL_SHUTDOWN_EVENT:
-                    isclosing = true;
-                    Console.WriteLine("User is logging off!");
-                    break;
+                    
+                }
+                else
+                {
+                    Console.Clear();
+                    Console.WriteLine("다시 입력하십시오.");
+                }
             }
-            return true;
-        }
-
+        }// end method
     }
 }

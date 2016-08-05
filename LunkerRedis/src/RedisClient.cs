@@ -7,65 +7,69 @@ using StackExchange.Redis;
 using LunkerRedis.src.Utils;
 using LunkerRedis.src.Common;
 using LunkerRedis.src.Frame.FE_BE;
-
+using System.Xml;
 using log4net;
 
 namespace LunkerRedis.src
 {
-    /*****
-     * 
-     * 함수 명 다시 ...
-     */
     public class RedisClient
     {
-        const string REDIS_IP = "192.168.56.102";
-        const int REDIS_PORT = 6379;
-
+        private string config = "";
+        private string ip = "";
+        private int port = 0;
         private ConnectionMultiplexer _redis = null;
         private IDatabase db = null;
-        private ISubscriber pubsub = null;
-
-        //private static RedisClient redisInstance = null;
 
         private ILog logger = FileLogger.GetLoggerInstance();
 
-        public RedisClient() { }
+        public RedisClient() {
+          
+            XmlTextReader reader = new XmlTextReader("config\\RedisConfig.xml");
+            int index = 0;
 
-
-        /*
-        public static RedisClient RedisInstance
-        {
-            get{
-                if (redisInstance == null)
+            while (reader.Read())
+            {
+                switch (reader.NodeType)
                 {
-                    redisInstance = new RedisClient();
-                    redisInstance.Connect();
+                    case XmlNodeType.Element: // The node is an element.
+                        if (reader.Name.Equals("RedisConfig"))
+                            continue;
+                        break;
+                    case XmlNodeType.Text: //Display the text in each element.
+                        //sb.Append(reader.Value);
+                        if (index == 0)
+                            ip = reader.Value;
+                        else
+                            port = int.Parse(reader.Value);
+                        index++;
+                        break;
+                    case XmlNodeType.EndElement: //Display the end of the element.
+                        if (reader.Name.Equals("RedisConfig"))
+                            continue;
+                        break;
                 }
-                return redisInstance;
-            }
+            }// end while 
+            config = ip + ":" + port + ",allowAdmin=true";
+            //config.
         }
-        */
-
-        public void Start() { }
 
         public ConnectionMultiplexer Redis
         {
             get { return this._redis; }
         }
-
-        /*
-         * Connect to redis server
-         * 
-         *  cache fe list from DB
-         */
+        
+         /// <summary>
+         /// Connect to redis server
+         /// </summary>
+         /// <returns></returns>
         public bool Connect()
         {
             try
             {
-                _redis = ConnectionMultiplexer.Connect("192.168.56.102:6379"+ ",allowAdmin=true,password=ldk201120841");
-                //pubsub = _redis.GetSubscriber();
+                logger.Debug(config);
+                _redis = ConnectionMultiplexer.Connect(config);
                 db = _redis.GetDatabase();
-                Console.WriteLine("[RedisClient] Connect Success");
+                logger.Debug("redis connect success!!!");
                 return true;
             }
             catch (Exception e)
@@ -79,7 +83,7 @@ namespace LunkerRedis.src
             if (_redis != null)
             {
                 _redis.Close();
-                _redis.Dispose();
+                //_redis.Dispose();
                 db = null;
                 _redis = null;
             }
@@ -299,6 +303,12 @@ namespace LunkerRedis.src
             return result;
         }
 
+        public int GetUserLoginCount(string remoteName)
+        {
+            string key = remoteName + Common.RedisKey.DELIMITER + Common.RedisKey.Login;
+
+            return (int) db.StringBitCount(key);
+        }
         public bool DelUserLoginKey(string remoteName)
         {
             string delimiter = ":";
@@ -355,12 +365,8 @@ namespace LunkerRedis.src
         {
             StringBuilder sb = new StringBuilder();
 
-            //int numId = (int) db.StringGet(id);
-
             // 3) 채팅방 번호 생성 
             int roomNo = ChatRoomNumberGenerator.GenerateRoomNo();
-
-            Console.WriteLine("Generated room number : " + roomNo);
             
             // 4) FE의 채팅방 목록에 추가 
 
@@ -510,17 +516,9 @@ namespace LunkerRedis.src
         public object GetChattingRanking(int range)
         {
             // user id의 배열 
-            //RedisValue[] ranks = db.SortedSetRangeByRank(Common.RedisKey.Ranking_Chatting, 0, range, Order.Descending);
             
             SortedSetEntry[] ranks = db.SortedSetRangeByRankWithScores(Common.RedisKey.Ranking_Chatting, 0, range, Order.Descending);
-            /*
-            string[] resultList = new string[ranks.Length];
-            for(int idx=0; idx<resultList.Length; idx++)
-            {
-                resultList[idx] = (string) ranks[idx];
-            }
-            */
-
+        
             return ranks;
         }
 
@@ -531,7 +529,7 @@ namespace LunkerRedis.src
         {
             logger.Debug("ClearDB() before exit()");
             if(Redis!=null)
-                _redis.GetServer(MyConst.Redis_IP, MyConst.Redis_Port).FlushDatabase();
+                Redis.GetServer(MyConst.Redis_IP, MyConst.Redis_Port).FlushDatabase();
         }
 
 

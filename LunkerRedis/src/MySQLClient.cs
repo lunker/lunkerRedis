@@ -9,34 +9,46 @@ using LunkerRedis.src.Frame;
 using System.Data;
 using log4net;
 using log4net.Config;
+using System.Data.SqlTypes;
 using LunkerRedis.src.Common;
+using System.Xml;
 
 namespace LunkerRedis.src
 {
     public class MySQLClient
     {
         private ILog logger = LogManager.GetLogger(MyConst.Logger);
+        private string config = "";
         private MySqlConnection conn = null;
 
-        public MySQLClient() { }
+        public MySQLClient() {
 
-        //private static MySQLClient instance = null;
+            StringBuilder sb = new StringBuilder();
 
-        /*
-        public static MySQLClient Instance
-        {
-            get
+            XmlTextReader reader = new XmlTextReader("config\\MySQLConfig.xml");
+            while (reader.Read())
             {
-                if (instance==null)
+                
+                switch (reader.NodeType)
                 {
-                    instance = new MySQLClient();
-                    instance.Connect();
+                    case XmlNodeType.Element: // The node is an element.
+                        if (reader.Name.Equals("MySQLConfig"))
+                            continue;
+                        sb.Append(reader.Name);
+                        break;
+                    case XmlNodeType.Text: //Display the text in each element.
+                        sb.Append("=");
+                        sb.Append(reader.Value);
+                        break;
+                    case XmlNodeType.EndElement: //Display the end of the element.
+                        if (reader.Name.Equals("MySQLConfig"))
+                            continue;
+                        sb.Append(";");
+                        break;
                 }
-                return instance;
             }
+            config = sb.ToString();
         }
-        */
-
 
         public void Release()
         {
@@ -44,7 +56,7 @@ namespace LunkerRedis.src
             if (conn != null)
             {
                 conn.Close();
-                conn.Dispose();
+                //conn.Dispose();
                 conn = null;
             }
         }
@@ -72,7 +84,7 @@ namespace LunkerRedis.src
 
         public void Connect()
         {
-            string config = "";
+            
             config = "server=192.168.56.190;uid=lunker;pwd=dongqlee;database=chatting;ConnectionTimeout=1200"; // 10minute
 
             try
@@ -80,11 +92,11 @@ namespace LunkerRedis.src
                 conn = new MySqlConnection();
                 conn.ConnectionString = config;
                 conn.Open();
-                Console.WriteLine("[MYSQL] connect success");
+                //Console.WriteLine("[MYSQL] connect success");
             }
             catch (MySql.Data.MySqlClient.MySqlException ex)
             {
-                Console.WriteLine("[MYSQL] connect fail");
+                //Console.WriteLine("[MYSQL] connect fail");
             }
         }
         
@@ -113,12 +125,12 @@ namespace LunkerRedis.src
 
             if (ds.Tables[0].Rows.Count != 0)
             {
-                Console.WriteLine("[MYSQL][CheckIdDUp()] duplicate");
+                logger.Debug("[MYSQL][CheckIdDUp()] duplicate");
                 return true;
             }
             else
             {
-                Console.WriteLine("[MYSQL][CheckIdDup()] not dup");
+                logger.Debug("[MYSQL][CheckIdDup()] not dup");
                 return false;
             }
         }
@@ -207,7 +219,8 @@ namespace LunkerRedis.src
                     DataRow row = ds.Tables[0].Rows[0];
                     user.Id = (string)row["id"];
                     user.Password = (string)row["password"];
-                    user.NumId = (int) row["num_id"];
+                    object ul = (object) row["num_id"];
+                    user.NumId = (int) Convert.ChangeType(ul, typeof(int));
 
                     if ( (bool) row[3] == true)
                     {

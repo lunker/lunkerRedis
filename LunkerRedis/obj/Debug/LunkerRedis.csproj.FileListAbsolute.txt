@@ -1,4 +1,6 @@
 D:\workspace\lunkerRedis\LunkerRedis\bin\Debug\LunkerRedis.exe.config
+D:\workspace\lunkerRedis\LunkerRedis\bin\Debug\LunkerRedis.exe.manifest
+D:\workspace\lunkerRedis\LunkerRedis\bin\Debug\LunkerRedis.application
 D:\workspace\lunkerRedis\LunkerRedis\bin\Debug\LunkerRedis.exe
 D:\workspace\lunkerRedis\LunkerRedis\bin\Debug\LunkerRedis.pdb
 D:\workspace\lunkerRedis\LunkerRedis\bin\Debug\log4net.dll
@@ -8,5 +10,8 @@ D:\workspace\lunkerRedis\LunkerRedis\bin\Debug\log4net.xml
 D:\workspace\lunkerRedis\LunkerRedis\bin\Debug\MySql.Data.xml
 D:\workspace\lunkerRedis\LunkerRedis\bin\Debug\StackExchange.Redis.pdb
 D:\workspace\lunkerRedis\LunkerRedis\bin\Debug\StackExchange.Redis.xml
+D:\workspace\lunkerRedis\LunkerRedis\obj\Debug\LunkerRedis.TrustInfo.xml
+D:\workspace\lunkerRedis\LunkerRedis\obj\Debug\LunkerRedis.exe.manifest
+D:\workspace\lunkerRedis\LunkerRedis\obj\Debug\LunkerRedis.application
 D:\workspace\lunkerRedis\LunkerRedis\obj\Debug\LunkerRedis.exe
 D:\workspace\lunkerRedis\LunkerRedis\obj\Debug\LunkerRedis.pdb
