@@ -19,11 +19,11 @@ namespace LunkerRedis.src
 {
     class ClientHandler
     {
+        private ILog logger = FileLogger.GetLoggerInstance();
+
         private Socket peer = null;
         private RedisClient redis = null;
         private MySQLClient mysql = null;
-
-        private ILog logger = FileLogger.GetLoggerInstance();
 
         private bool threadState = MyConst.Run;
         private int healthCount = 0;
@@ -32,13 +32,15 @@ namespace LunkerRedis.src
         public ClientHandler(Socket handler)
         {
             this.peer = handler;
-            //redis = RedisClient.RedisInstance;
             redis = RedisClientPool.GetInstance();
-            //mysql = MySQLClient.Instance;
             mysql = MySQLClientPool.GetInstance();
         }
 
-
+        /// <summary>
+        /// Send Health Check Message
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void SendHealthCheck(object sender, ElapsedEventArgs e)
         {
             Interlocked.Increment(ref healthCount);
@@ -61,18 +63,25 @@ namespace LunkerRedis.src
             return;
         }
 
+        /// <summary>
+        /// Handle Health Check Receive
+        /// </summary>
         public void HandleHealthCheck()
         {
             healthCount = 0;
         }
 
+        /// <summary>
+        /// Stop Thread
+        /// </summary>
         public void HandleStopThread()
         {
             threadState = MyConst.Exit;
         }
-        /**
-         * Monitoring Client의 request 처리 
-         */
+
+        /// <summary>
+        /// Monitoring Client의 request 처리 
+        /// </summary>
         public void HandleRequest()
         {
             logger.Debug("[ce_handler][HandleRequest()]");
@@ -111,20 +120,21 @@ namespace LunkerRedis.src
                             HandleChatRanking(header.Length);
                             break;
                         default:
-                            //HandleError();
+                            HandleError();
                             break;
                     }
                 }
                 catch (SocketException se)
                 {
-                    Console.WriteLine("error!!!!!!!!!!!!!!!!!!!!!!");
                     peer.Close();
-
-                    RedisClientPool.ReleaseObject(redis);
-                    MySQLClientPool.ReleaseObject(mysql);
 
                     logger.Debug("[ce_handler][HandleRequest()] Client Handler Exit.");
                     break;
+                }
+                finally
+                {
+                    RedisClientPool.ReleaseObject(redis);
+                    MySQLClientPool.ReleaseObject(mysql);
                 }
             }//end loop
 
@@ -136,7 +146,6 @@ namespace LunkerRedis.src
 
         public void HandleLogin(int bodyLength)
         {
-            //Console.WriteLine("[ce_handler][HandleLogin()] start");
             logger.Debug("[ce_handler][HandleLogin()] 로그인 시작");
             // read body
             CBLoginRequestBody body = (CBLoginRequestBody)NetworkManager.Read(peer, bodyLength, typeof(CBLoginRequestBody));
@@ -180,11 +189,11 @@ namespace LunkerRedis.src
             return;
 
         }
-
-        /*
-         * 전체 채팅방 수 조회 
-         * 1) 
-         */
+      
+        /// <summary>
+        /// Handle Request Total Room Count
+        /// </summary>
+        /// <param name="bodyLength">body message length</param>
         public void HandleRequestTotalRoomCount(int bodyLength)
         {
             logger.Debug("[ce_handler][HandleRequestTotalRoomCount()] 전체 채팅방 개수 조회 시작");
@@ -213,13 +222,15 @@ namespace LunkerRedis.src
             return;
         }// end method
 
-        /*
-         * FE별 사용자 수 조회 
-         * 1) 전체 FE IP:PORT string 가져옴 
-         * 2) 가져온 string -> fe Name 조회 
-         * 3) fename:chattingroomlist를 통해서 채팅방 번호들 조회 
-         * 4) 각각 채팅방의 count조회. 
-         */
+
+        /// <summary>
+        /// HandleRequest List FE' user count
+        /// <para>1) 전체 FE IP:PORT string 가져옴 </para>
+        /// <para>2) 가져온 string -> fe Name 조회</para>
+        /// <para>3) fename:chattingroomlist를 통해서 채팅방 번호들 조회 </para>
+        /// <para>4) 각각 채팅방의 count조회. </para>
+        /// </summary>
+        /// <param name="bodyLength"></param>
         public void HandleFEUserStatus(int bodyLength)
         {
             logger.Debug("[ce_handler][HandleFEUserStatus()] FE별 사용자수 조회 시작");
@@ -231,25 +242,11 @@ namespace LunkerRedis.src
 
             for(int idx=0; idx < feList.Length; idx++)
             {
-                int feUserCountSum = 0;
                 // 2) ip:port -> fe name 조회
                 string feName = redis.GetFEName(feList[idx]);
 
                 int feConnectedUserCount = redis.GetUserLoginCount(feName);
                 
-                
-                /*
-                // 3) 해당 fe에 열려있는 채팅방 번호 조회 
-                int[] roomList = (int[]) redis.GetFEChattingRoomList(feName);
-
-                // 4) 각각의 채팅방 count조회 
-
-                foreach (int roomNo in roomList)
-                {
-                    feUserCountSum += redis.GetChatRoomCount(feName, roomNo);
-                }
-
-                */
 
                 feStatusList[idx] = new CBFEUserStatus();
 
@@ -291,10 +288,11 @@ namespace LunkerRedis.src
             logger.Debug("[ce_handler][HandleFEUserStatus()] FE별 사용자수 조회 종료");
             return;
         }// end method
-
-        /*
-         * 1) 그냥 랭킹 조회
-         */
+            
+        /// <summary>
+        /// Handle Chat ranking request
+        /// </summary>
+        /// <param name="bodyLength">body message length</param>
         public void HandleChatRanking(int bodyLength)
         {
             logger.Debug("[ce_handler][HandleChatRanking()] 랭킹 조회 시작");
@@ -308,8 +306,6 @@ namespace LunkerRedis.src
             {
                 ranking[idx] = new CBRanking();
                 ranking[idx].Id = new char[12];
-
-                ////Array.Copy(feName.ToCharArray(), feNameArr, feName.ToCharArray().Length);
 
                 Array.Copy( ((string)results[idx].Element).ToCharArray(), ranking[idx].Id, ((string)results[idx].Element).ToCharArray().Length); 
                 ranking[idx].Rank = idx+1;
@@ -343,7 +339,11 @@ namespace LunkerRedis.src
             return;
         }// end method 
 
-
+        public void HandleError()
+        {
+            logger.Debug($"[fe_handler][HandleError] 정의되지 않은 메세지  ");
+            return;
+        }
     }// end class
 
 

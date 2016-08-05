@@ -16,11 +16,6 @@ using log4net;
 
 namespace LunkerRedis.src
 {
-
-    /**
-     * socket listener
-     * 
-     */ 
     class SockListener
     {
 
@@ -32,10 +27,9 @@ namespace LunkerRedis.src
 
         private int BACK_LOG = 1000;
         private bool threadState = MyConst.Run;
-        //private Thread[] frontendHandlerList = null;
-        //private Thread[] clientHandlerList = null;
-        private List<FrontendHandler> frontendHandlerList = null;
-        private List<ClientHandler> clientHandlerList = null;
+
+        private List<FrontendHandler> frontendHandlerList = null; // frontend handler list
+        private List<ClientHandler> clientHandlerList = null; // client handler list
 
 
         public SockListener() { }
@@ -47,12 +41,8 @@ namespace LunkerRedis.src
             clientHandlerList = new List<ClientHandler>();
         }
 
-        /*
-         * 
-         */
         public void Listen()
         {
-            //Console.WriteLine("[sock_listener] Listen . . .");
             listener.Listen(BACK_LOG);
 
             try
@@ -82,7 +72,6 @@ namespace LunkerRedis.src
             }
             catch (SocketException se)
             {
-                //Console.WriteLine("[sock_listener] exception . . .");
                 return;
             }
         }// end method
@@ -103,12 +92,11 @@ namespace LunkerRedis.src
             }
 
         }
-        /*
-         * Host' IP-PORT로  socket connect
-         * <return> bool 
-         * true:  
-         * false: 
-         */ 
+
+        /// <summary>
+        /// Bind Socket
+        /// </summary>
+        /// <returns></returns>
         public bool Connect() 
         {
             IPEndPoint host = null;
@@ -122,7 +110,7 @@ namespace LunkerRedis.src
             }
             catch(SocketException se)
             {
-                //Console.WriteLine(se.SocketErrorCode);
+
                 return false;
             }
             catch (ArgumentNullException ane)

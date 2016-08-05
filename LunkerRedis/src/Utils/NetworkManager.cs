@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace LunkerRedis.src.Utils
 {
+    /// <summary>
+    /// Utils About Networking
+    /// </summary>
     public static class NetworkManager
     {
         enum Types : short { Header = 1, Message = 2 };
@@ -30,6 +33,7 @@ namespace LunkerRedis.src.Utils
             
             return obj; // 구조체 리턴
         }// end method
+
         public static object[] ByteToStructureArray(byte[] data, Type type)
         {
             int objLength = data.Length / (Marshal.SizeOf(type));
@@ -143,10 +147,6 @@ namespace LunkerRedis.src.Utils
 
         }// end method
 
-        /*
-         * Read length byte from peer 
-         * return byte[]
-         */
         public static byte[] Read(Socket peer, int length)
         {
             int rc = 0;
@@ -200,7 +200,6 @@ namespace LunkerRedis.src.Utils
 
                 }
 
-                //Console.WriteLine("[parser][send()] " + rc + "bytes");
                 return true;
             }
             catch (SocketException se)

@@ -27,16 +27,16 @@ namespace LunkerRedis
                 string close = Console.ReadLine();
                 if (close.Equals("y") || close.Equals("Y"))
                 {
-                    backendServer.RequestStopThread();
-                    RedisClientPool.GetInstance().ClearDB();
-                    RedisClientPool.Dispose();
-                    MySQLClientPool.Dispose();
-                    appState = MyConst.Exit;
+                    backendServer.RequestStopThread();// stop all thread
+                    RedisClientPool.GetInstance().ClearDB(); // clear db
+                    RedisClientPool.Dispose(); // release object pool
+                    MySQLClientPool.Dispose(); // release object pool
+                    appState = MyConst.Exit; // exit main thread
 
                     Console.Clear();
                     Console.Write("어플리케이션을 종료중입니다 . . .");
                     logger.Debug("--------------------------------------------Exit Program-----------------------------------------------------");
-                    Environment.Exit(0);
+                    Environment.Exit(0); // exit main process
                 }
                 else
                 {

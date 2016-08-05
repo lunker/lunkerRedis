@@ -91,10 +91,8 @@
     <Compile Include="Backend.cs" />
     <Compile Include="src\ClientHandler.cs" />
     <Compile Include="src\Common\ProtocolLength.cs" />
-    <Compile Include="src\Common\MessageType.cs" />
     <Compile Include="src\Common\MyConst.cs" />
     <Compile Include="src\Common\RedisKey.cs" />
-    <Compile Include="src\Frame\ChatRoom.cs" />
     <Compile Include="src\Frame\Client-BE\CBHeader.cs" />
     <Compile Include="src\Frame\Client-BE\CBFEUserStatus.cs" />
     <Compile Include="src\Frame\Client-BE\CBLoginRequestBody.cs" />
@@ -127,10 +125,8 @@
     <Compile Include="src\SockListener.cs" />
     <Compile Include="src\Utils\FENameGenerator.cs" />
     <Compile Include="src\Utils\FileLogger.cs" />
-    <Compile Include="src\Utils\HeaderFactory.cs" />
     <Compile Include="src\Utils\ChatRoomNumberGenerator.cs" />
     <Compile Include="src\Utils\NetworkManager.cs" />
-    <Compile Include="src\Utils\RedisKeyGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

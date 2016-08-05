@@ -106,8 +106,6 @@ namespace LunkerRedis.src.Common
 
         public static int frontendPort = 25389;
         public static int clientPort = 20852;
-
-        //public static string IP = "10.100.58.3";
       
         public static int HEADER_LENGTH = 4;
 

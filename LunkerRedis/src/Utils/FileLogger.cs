@@ -13,6 +13,10 @@ namespace LunkerRedis.src.Utils
     {
         public static ILog logger = null;
 
+        /// <summary>
+        /// Get Logger Instance
+        /// </summary>
+        /// <returns>logger</returns>
         public static ILog GetLoggerInstance()
         {
             if (logger == null)

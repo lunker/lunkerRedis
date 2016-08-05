@@ -28,8 +28,4 @@ namespace LunkerRedis.src.Common
 
     }
 
-    public enum RedisType : int
-    {
-        
-    }
 }
