@@ -15,3 +15,4 @@ D:\workspace\lunkerRedis\LunkerRedis\obj\Release\LunkerRedis.exe.manifest
 D:\workspace\lunkerRedis\LunkerRedis\obj\Release\LunkerRedis.application
 D:\workspace\lunkerRedis\LunkerRedis\obj\Release\LunkerRedis.exe
 D:\workspace\lunkerRedis\LunkerRedis\obj\Release\LunkerRedis.pdb
+D:\workspace\lunkerRedis\LunkerRedis\obj\Release\LunkerRedis.csprojResolveAssemblyReference.cache

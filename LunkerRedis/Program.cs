@@ -15,66 +15,8 @@ namespace LunkerRedis
 
         static void Main(string[] args)
         {
-            /*
-            XmlTextReader reader = new XmlTextReader("config\\MySQLConfig.xml");
-            while (reader.Read())
-            {
-                switch (reader.NodeType)
-                {
-                    case XmlNodeType.Element: // The node is an element.
-                        if (reader.Name.Equals("MySQLConfig"))
-                            continue;
-                        Console.Write("<" + reader.Name);
-                        Console.WriteLine(">");
-                        break;
-                    case XmlNodeType.Text: //Display the text in each element.
-                        Console.WriteLine(reader.Name);
-                        break;
-                    case XmlNodeType.EndElement: //Display the end of the element.
-                        if (reader.Name.Equals("MySQLConfig"))
-                            continue;
-                        Console.Write("</" + reader.Name);
-                        Console.WriteLine(">");
-                        break;
-                }
-            }
-            */
-
-
-            XmlTextReader reader = new XmlTextReader("config\\RedisConfig.xml");
-            int index = 0;
-            string ip = "";
-            int port = 0;
-       
-            while (reader.Read())
-            {
-                switch (reader.NodeType)
-                {
-                    case XmlNodeType.Element: // The node is an element.
-                        if (reader.Name.Equals("RedisConfig"))
-                            continue;
-                        break;
-                    case XmlNodeType.Text: //Display the text in each element.
-                        //sb.Append(reader.Value);
-                        if (index == 0)
-                            ip = reader.Value;
-                        else
-                            port = int.Parse(reader.Value);
-
-                        index++;
-                        break;
-                    case XmlNodeType.EndElement: //Display the end of the element.
-                        if (reader.Name.Equals("RedisConfig"))
-                            continue;
-                        break;
-                }
-            }// end while 
-            string config = ip + ":" + port + ",allowAdmin=true";
-            logger.Debug(config);
             logger.Debug("\n\n\n\n\n--------------------------------------------Backend Server-----------------------------------------------------");
             logger.Debug("--------------------------------------------Start Program-----------------------------------------------------");
-
-
 
             backendServer = new Backend();
             backendServer.Start();
@@ -95,7 +37,6 @@ namespace LunkerRedis
                     Console.Write("어플리케이션을 종료중입니다 . . .");
                     logger.Debug("--------------------------------------------Exit Program-----------------------------------------------------");
                     Environment.Exit(0);
-                    
                 }
                 else
                 {

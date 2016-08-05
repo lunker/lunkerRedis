@@ -33,7 +33,7 @@ namespace LunkerRedis
         public void Initialize()
         {
             // connection for FE 
-            frontendListener = new SockListener(MyConst.IP,MyConst.FRONTEND_PORT);
+            frontendListener = new SockListener(IPAddress.Any.ToString(), MyConst.frontendPort);
             if (frontendListener.Connect())
                 logger.Debug("[FE_LISTENER] conenct success");
             else
@@ -43,7 +43,7 @@ namespace LunkerRedis
             fListenerThread.Start();
          
             // connection for Monitoring Server
-            clientListener = new SockListener(MyConst.IP, MyConst.CLIENT_PORT);
+            clientListener = new SockListener(IPAddress.Any.ToString(), MyConst.clientPort);
             if (clientListener.Connect())
                 logger.Debug("[CLINET_LISTENER] conenct success");
             else

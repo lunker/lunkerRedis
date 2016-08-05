@@ -14,9 +14,7 @@ namespace LunkerRedis.src
 {
     public class RedisClient
     {
-        private string config = "";
-        private string ip = "";
-        private int port = 0;
+
         private ConnectionMultiplexer _redis = null;
         private IDatabase db = null;
 
@@ -24,33 +22,7 @@ namespace LunkerRedis.src
 
         public RedisClient() {
           
-            XmlTextReader reader = new XmlTextReader("config\\RedisConfig.xml");
-            int index = 0;
-
-            while (reader.Read())
-            {
-                switch (reader.NodeType)
-                {
-                    case XmlNodeType.Element: // The node is an element.
-                        if (reader.Name.Equals("RedisConfig"))
-                            continue;
-                        break;
-                    case XmlNodeType.Text: //Display the text in each element.
-                        //sb.Append(reader.Value);
-                        if (index == 0)
-                            ip = reader.Value;
-                        else
-                            port = int.Parse(reader.Value);
-                        index++;
-                        break;
-                    case XmlNodeType.EndElement: //Display the end of the element.
-                        if (reader.Name.Equals("RedisConfig"))
-                            continue;
-                        break;
-                }
-            }// end while 
-            config = ip + ":" + port + ",allowAdmin=true";
-            //config.
+            //XmlTextReader reader = 
         }
 
         public ConnectionMultiplexer Redis
@@ -66,8 +38,7 @@ namespace LunkerRedis.src
         {
             try
             {
-                logger.Debug(config);
-                _redis = ConnectionMultiplexer.Connect(config);
+                _redis = ConnectionMultiplexer.Connect(MyConst.redisConfig);
                 db = _redis.GetDatabase();
                 logger.Debug("redis connect success!!!");
                 return true;
@@ -516,7 +487,6 @@ namespace LunkerRedis.src
         public object GetChattingRanking(int range)
         {
             // user id의 배열 
-            
             SortedSetEntry[] ranks = db.SortedSetRangeByRankWithScores(Common.RedisKey.Ranking_Chatting, 0, range, Order.Descending);
         
             return ranks;
@@ -528,8 +498,40 @@ namespace LunkerRedis.src
         public void ClearDB()
         {
             logger.Debug("ClearDB() before exit()");
-            if(Redis!=null)
-                Redis.GetServer(MyConst.Redis_IP, MyConst.Redis_Port).FlushDatabase();
+            if (Redis != null)
+            {
+                string ip = "";
+                int port = 0;
+
+                XmlTextReader reader = new XmlTextReader("config\\RedisConfig.xml");
+                int index = 0;
+
+                while (reader.Read())
+                {
+                    switch (reader.NodeType)
+                    {
+                        case XmlNodeType.Element: // The node is an element.
+                            if (reader.Name.Equals("RedisConfig"))
+                                continue;
+                            break;
+                        case XmlNodeType.Text: //Display the text in each element.
+                                               //sb.Append(reader.Value);
+                            if (index == 0)
+                                ip = reader.Value;
+                            else
+                                port = int.Parse(reader.Value);
+                            index++;
+                            break;
+                        case XmlNodeType.EndElement: //Display the end of the element.
+                            if (reader.Name.Equals("RedisConfig"))
+                                continue;
+                            break;
+                    }
+                }// end while 
+
+                Redis.GetServer(ip, port).FlushDatabase();
+            }
+                
         }
 
 

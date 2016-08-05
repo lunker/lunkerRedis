@@ -154,6 +154,7 @@
     <Folder Include="dist\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="config\AppConfig.xml" />
     <Content Include="config\RedisConfig.xml" />
     <Content Include="config\MySQLConfig.xml" />
     <Content Include="config\Logconfig.xml" />

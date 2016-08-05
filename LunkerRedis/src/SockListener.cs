@@ -62,7 +62,7 @@ namespace LunkerRedis.src
                     Socket peer = null;
                     peer = listener.Accept();
 
-                    if (PORT == MyConst.CLIENT_PORT)
+                    if (PORT == MyConst.clientPort)
                     {
                         ClientHandler handler = new ClientHandler(peer);
 

@@ -21,34 +21,7 @@ namespace LunkerRedis.src
         private string config = "";
         private MySqlConnection conn = null;
 
-        public MySQLClient() {
-
-            StringBuilder sb = new StringBuilder();
-
-            XmlTextReader reader = new XmlTextReader("config\\MySQLConfig.xml");
-            while (reader.Read())
-            {
-                
-                switch (reader.NodeType)
-                {
-                    case XmlNodeType.Element: // The node is an element.
-                        if (reader.Name.Equals("MySQLConfig"))
-                            continue;
-                        sb.Append(reader.Name);
-                        break;
-                    case XmlNodeType.Text: //Display the text in each element.
-                        sb.Append("=");
-                        sb.Append(reader.Value);
-                        break;
-                    case XmlNodeType.EndElement: //Display the end of the element.
-                        if (reader.Name.Equals("MySQLConfig"))
-                            continue;
-                        sb.Append(";");
-                        break;
-                }
-            }
-            config = sb.ToString();
-        }
+        public MySQLClient() { }
 
         public void Release()
         {
@@ -84,19 +57,15 @@ namespace LunkerRedis.src
 
         public void Connect()
         {
-            
-            config = "server=192.168.56.190;uid=lunker;pwd=dongqlee;database=chatting;ConnectionTimeout=1200"; // 10minute
-
             try
             {
                 conn = new MySqlConnection();
-                conn.ConnectionString = config;
+                conn.ConnectionString = MyConst.mysqlConfig;
                 conn.Open();
-                //Console.WriteLine("[MYSQL] connect success");
             }
             catch (MySql.Data.MySqlClient.MySqlException ex)
             {
-                //Console.WriteLine("[MYSQL] connect fail");
+                return;
             }
         }
         

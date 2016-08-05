@@ -3,21 +3,112 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace LunkerRedis.src.Common
 {
     public static class MyConst
     {
-        public static int FRONTEND_PORT = 25389;
-        public static int CLIENT_PORT = 20852;
+        static MyConst()
+        {
+            // Read MySQL Config
+            StringBuilder sb = new StringBuilder();
 
-        // 10.100.58.3
-        public static string IP = "10.100.58.3";
-        public static string Redis_IP = "192.168.56.102";
-        public static string Mysql_IP = "192.168.56.190";
+            XmlTextReader reader = new XmlTextReader("config\\MySQLConfig.xml");
+            while (reader.Read())
+            {
 
-        public static int Redis_Port = 6379;
+                switch (reader.NodeType)
+                {
+                    case XmlNodeType.Element: // The node is an element.
+                        if (reader.Name.Equals("MySQLConfig"))
+                            continue;
+                        sb.Append(reader.Name);
+                        break;
+                    case XmlNodeType.Text: //Display the text in each element.
+                        sb.Append("=");
+                        sb.Append(reader.Value);
+                        break;
+                    case XmlNodeType.EndElement: //Display the end of the element.
+                        if (reader.Name.Equals("MySQLConfig"))
+                            continue;
+                        sb.Append(";");
+                        break;
+                }
+            }
+            mysqlConfig = sb.ToString();
 
+            /*
+             * read redis config 
+             */
+            reader = new XmlTextReader("config\\RedisConfig.xml");
+            int index = 0;
+            string ip = "";
+            int port = 0;
+            while (reader.Read())
+            {
+                switch (reader.NodeType)
+                {
+                    case XmlNodeType.Element: // The node is an element.
+                        if (reader.Name.Equals("RedisConfig"))
+                            continue;
+                        break;
+                    case XmlNodeType.Text: //Display the text in each element.
+                        //sb.Append(reader.Value);
+                        if (index == 0)
+                            ip = reader.Value;
+                        else
+                            port = int.Parse(reader.Value);
+                        index++;
+                        break;
+                    case XmlNodeType.EndElement: //Display the end of the element.
+                        if (reader.Name.Equals("RedisConfig"))
+                            continue;
+                        break;
+                }
+            }// end while 
+            redisConfig = ip + ":" + port + ",allowAdmin=true";
+
+            // read App Config 
+            reader = new XmlTextReader("config\\Appconfig.xml");
+            
+            while (reader.Read())
+            {
+                switch (reader.NodeType)
+                {
+                    case XmlNodeType.Element: // The node is an element.
+                        if (reader.Name.Equals("AppConfig"))
+                            continue;
+                        else if (reader.Name.Equals("frontendListenPort"))
+                        {
+                            reader.Read();
+                            frontendPort = int.Parse(reader.Value);
+                        }
+                        else if (reader.Name.Equals("clientListenPort"))
+                        {
+                            reader.Read();
+                            clientPort = int.Parse(reader.Value);
+                        }
+                        break;
+                    case XmlNodeType.Text: //Display the text in each element.
+                        //sb.Append(reader.Value);
+                        break;
+                    case XmlNodeType.EndElement: //Display the end of the element.
+                        if (reader.Name.Equals("Appconfig"))
+                            continue;
+                        break;
+                }
+            }// end while 
+        }// end static structor
+
+        public static string mysqlConfig = "";
+        public static string redisConfig = "";
+
+        public static int frontendPort = 25389;
+        public static int clientPort = 20852;
+
+        //public static string IP = "10.100.58.3";
+      
         public static int HEADER_LENGTH = 4;
 
         public static bool LOGINED = true;
