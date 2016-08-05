@@ -30,9 +30,14 @@ Team [혜진-태우-동규]
 - Monitoring Client는 5초에 한번씩 조회 요청을 보내기에, 별도의 Heatlcheck를 구현하지 않았습니다.
 
 ## 실행방법
+0) Release Binary 다운로드  
 1) VM 환경 구성  
 2) 환경설정  
 3) 실행  
+
+
+### 실행방법 - Release Binary 다운로드
+1) 'release' branch에서 'release.7z'을 다운로드 
 
 ### 실행방법 - VM 환경 구성 
 
