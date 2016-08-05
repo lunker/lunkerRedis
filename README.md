@@ -21,28 +21,29 @@
 
 ## 기능
 - User의 state 저장 
-- 채팅룸, 채팅 내역 등의 정보 cache
-- Monitoring 기능 제공 
-- 
+- 채팅룸, 채팅 내역 등의 정보 cache  
+- Monitoring 기능 제공  
+
 
 ## 실행방법
 1) VM 환경 구성  
 2) 환경설정  
 3) 실행  
 
-### 실행방법 - VM 환경 구성
+### 실행방법 - VM 환경 구성 
+
 1) MySQL - 5.7.13 GA
 - 가상 호스트 전용 어답터를 사용.    
 - 
 - Release/sql/User.sql의 Query 실행
 
-2) Redis
+2) Redi
 - 
 
 ### 실행방법 - 환경설정 
 
 1) MySQL config 설정
--  
+- path : 
 
 ```
 <MySQLConfig>
