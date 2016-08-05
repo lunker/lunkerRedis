@@ -20,9 +20,11 @@
 - mysql connector (https://dev.mysql.com/downloads/connector/net/6.9.html)  
 
 ## 기능
-- User의 state 저장 
+- Frontend Server, Monitoring Client의 요청을 처리하기 위하여 각각의 Listener를 구현.
+- Backend Server에 접속한 Frontend Server들의 정보들을 동적으로 관리합니다.
+- User의 접속 여부, 채팅 횟수 등을 관리합니다.
 - 채팅룸, 채팅 내역 등의 정보 cache  
-- Monitoring 기능 제공  
+- Monitoring 기능을 제공합니다. 1) 전체 채팅방 수 조회 2) FE별 사용자수 조회 3) 채팅 랭킹 조회   
 
 
 ## 실행방법
@@ -33,17 +35,20 @@
 ### 실행방법 - VM 환경 구성 
 
 1) MySQL - 5.7.13 GA
-- 가상 호스트 전용 어답터를 사용.    
-- 
-- Release/sql/User.sql의 Query 실행
+- 가상 호스트 전용 어답터를 사용.  
+- Release/sql/User.sql의 Query 실행하여 관련 Table Setup   
 
-2) Redi
-- 
+  
+2) Redis
+- 가상 호스트 전용 어답터를 사용.
+- 별도의 설정없이 기본 설치 후 사용.
 
 ### 실행방법 - 환경설정 
 
 1) MySQL config 설정
-- path : 
+- path : config/MySQLConfig.xml
+- database, connectiontimeout을 제외한 나머지 정보들을 알맞게 수정.
+
 
 ```
 <MySQLConfig>
@@ -58,6 +63,7 @@
 
 2) Redis config 설정
 - path : release/config/RedisConfig.xml    
+- ip, port 수정
 - ip : 가상 호스트 전용 ip (192.168.56.xxx) 
 - port : port
 
@@ -71,7 +77,9 @@
 
 3) Application Config 설정
 - path : release/config/AppConfig.xml  
-- 
+- client, frontend Server의 listen port 지정
+
+
 ```
 <AppConfig>
   <clientListenPort>20852</clientListenPort>
@@ -81,4 +89,6 @@
 
 
 ### 실행 
-- release/
+- MySQL VM 실행 및 mysqld 실행 
+- Redis VM 실행 및 redis.service 실행
+- release/LunkerRedis.exe 실행 
