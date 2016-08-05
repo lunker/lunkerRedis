@@ -100,7 +100,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\MySQLClient.cs" />
+    <Compile Include="src\MySQLClientPool.cs" />
     <Compile Include="src\RedisClient.cs" />
+    <Compile Include="src\RedisClientPool.cs" />
     <Compile Include="src\RedisWorker.cs" />
     <Compile Include="src\SockListener.cs" />
     <Compile Include="src\Utils\FENameGenerator.cs" />

@@ -24,6 +24,7 @@ namespace LunkerRedis
 
         static void Main(string[] args)
         {
+            logger.Debug("\n\n\nn\n\n--------------------------------------------Backend Server-----------------------------------------------------");
             logger.Debug("--------------------------------------------Start Program-----------------------------------------------------");
 
             SetConsoleCtrlHandler(ConsoleCtrlCheck, true);
@@ -64,9 +65,11 @@ namespace LunkerRedis
                 case CtrlTypes.CTRL_C_EVENT:
                     isclosing = true;
 
-                    RedisClient.RedisInstance.ClearDB();
-                    RedisClient.RedisInstance.Release();
-                    MySQLClient.Instance.Release();
+                    //RedisClient.RedisInstance.ClearDB();
+                    //RedisClient.RedisInstance.Release();
+                    RedisClientPool.Dispose();
+                    MySQLClientPool.Dispose();
+                    //MySQLClient.Instance.Release();
 
                     logger.Debug("--------------------------------------------Exit Program-----------------------------------------------------");
                     Environment.Exit(0);
@@ -80,9 +83,11 @@ namespace LunkerRedis
                 case CtrlTypes.CTRL_CLOSE_EVENT:
                     isclosing = true;
 
-                    RedisClient.RedisInstance.ClearDB();
-                    RedisClient.RedisInstance.Release();
-                    MySQLClient.Instance.Release();
+                    //RedisClient.RedisInstance.ClearDB();
+                    //RedisClient.RedisInstance.Release();
+                    RedisClientPool.Dispose();
+                    MySQLClientPool.Dispose();
+                    //MySQLClient.Instance.Release();
 
                     logger.Debug("--------------------------------------------Exit Program-----------------------------------------------------");
                     Environment.Exit(0);

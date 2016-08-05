@@ -49,6 +49,7 @@ namespace LunkerRedis
 
             Thread fListenerThread = new Thread(new ThreadStart(frontendListener.Listen));
             fListenerThread.Start();
+
             Console.WriteLine("[FE_HANDLER] 초기화 완료");
 
          

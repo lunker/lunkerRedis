@@ -18,9 +18,11 @@ namespace LunkerRedis.src
         private ILog logger = LogManager.GetLogger(MyConst.Logger);
         private MySqlConnection conn = null;
 
-        private MySQLClient() { }
+        public MySQLClient() { }
 
-        private static MySQLClient instance = null;
+        //private static MySQLClient instance = null;
+
+        /*
         public static MySQLClient Instance
         {
             get
@@ -33,32 +35,45 @@ namespace LunkerRedis.src
                 return instance;
             }
         }
+        */
+
 
         public void Release()
         {
-            conn.Close();
-            conn.Dispose();
-            conn = null;
+            logger.Debug("[MySQL][Release()] Release MySQL Client ");
+            if (conn != null)
+            {
+                conn.Close();
+                conn.Dispose();
+                conn = null;
+            }
         }
 
         public bool Ping()
         {
-            if (conn.Ping())
+            logger.Debug("[MySQL][Ping()] Ping . . .");
+            if (conn != null)
             {
-                logger.Debug("[MySQL][Ping()] connection true : alive");
-                return true;
+                if (conn.Ping())
+                {
+                    logger.Debug("[MySQL][Ping()] connection true : alive");
+                    return true;
+                }
+                else
+                {
+                    logger.Debug("[MySQL][Ping()] connection false : die");
+                    return false;
+                }
+
             }
             else
-            {
-                logger.Debug("[MySQL][Ping()] connection false : die");
                 return false;
-            }
         }
 
         public void Connect()
         {
             string config = "";
-            config = "server=192.168.56.190;uid=lunker;pwd=dongqlee;database=chatting;ConnectionTimeout=600"; // 10minute
+            config = "server=192.168.56.190;uid=lunker;pwd=dongqlee;database=chatting;ConnectionTimeout=1200"; // 10minute
 
             try
             {
@@ -79,9 +94,10 @@ namespace LunkerRedis.src
          */
         public bool CheckIdDup(string id)
         {
-
+            
             if (!Ping())
                 Connect();
+            
 
             StringBuilder sb = new StringBuilder();
             sb.Append("SELECT * FROM USER ");
@@ -112,9 +128,10 @@ namespace LunkerRedis.src
          */
         public bool CreateUser(string id, string password, bool isDummy)
         {
-
+            
             if (!Ping())
                 Connect();
+            
 
             logger.Info("[MySQL][CreateUser()] start");            
             int result = 0;
@@ -139,10 +156,10 @@ namespace LunkerRedis.src
          */
         public int SelectUserNumId(string id)
         {
-
+            
             if (!Ping())
                 Connect();
-
+       
             int numId = 0;
 
             // GENERATE QUERY
@@ -167,42 +184,46 @@ namespace LunkerRedis.src
         public User SelectUserInfo(string id)
         {
 
+            
             if (!Ping())
                 Connect();
-
-            User user = new User();
-            // GENERATE QUERY
-            StringBuilder sb = new StringBuilder();
-            sb.Append("SELECT * FROM USER ");
-            sb.Append("WHERE ID=");
-            sb.Append("'"+id+"'");
-            string query = sb.ToString();
-
-            DataSet ds = new DataSet();
-            MySqlDataAdapter da = new MySqlDataAdapter(query, conn);
-            da.Fill(ds);
-
-            if (ds.Tables[0].Rows.Count != 0)
+            
+            lock (this)
             {
-                DataRow row = ds.Tables[0].Rows[0];
-                user.Id = (string)row["id"];
-                user.Password = (string)row["password"];
+                User user = new User();
+                // GENERATE QUERY
+                StringBuilder sb = new StringBuilder();
+                sb.Append("SELECT ID, NUM_ID, PASSWORD, DUMMY FROM USER ");
+                sb.Append("WHERE ID=");
+                sb.Append("'" + id + "'");
+                string query = sb.ToString();
 
-                
-                if ( row[3].Equals(1))
+                DataSet ds = new DataSet();
+                MySqlDataAdapter da = new MySqlDataAdapter(query, conn);
+                da.Fill(ds);
+
+                if (ds.Tables[0].Rows.Count != 0)
                 {
-                    user.IsDummy = true;
+                    DataRow row = ds.Tables[0].Rows[0];
+                    user.Id = (string)row["id"];
+                    user.Password = (string)row["password"];
+                    user.NumId = (int) row["num_id"];
+
+                    if ( (bool) row[3] == true)
+                    {
+                        user.IsDummy = true;
+                    }
+                    else
+                        user.IsDummy = false;
                 }
                 else
-                    user.IsDummy = false;
+                {
+                    return null;
+                }
 
-            }
-            else
-            {
-                return null;
-            }
-            
-            return user;
-        }
+                return user;
+            }// end lock 
+
+        }// end method
     }
 }

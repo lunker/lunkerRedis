@@ -20,15 +20,19 @@ namespace LunkerRedis.src
     {
         const string REDIS_IP = "192.168.56.102";
         const int REDIS_PORT = 6379;
+
         private ConnectionMultiplexer _redis = null;
         private IDatabase db = null;
         private ISubscriber pubsub = null;
 
-        private static RedisClient redisInstance = null;
+        //private static RedisClient redisInstance = null;
 
         private ILog logger = FileLogger.GetLoggerInstance();
 
-        private RedisClient() { }
+        public RedisClient() { }
+
+
+        /*
         public static RedisClient RedisInstance
         {
             get{
@@ -40,7 +44,7 @@ namespace LunkerRedis.src
                 return redisInstance;
             }
         }
-
+        */
 
         public void Start() { }
 
@@ -59,7 +63,7 @@ namespace LunkerRedis.src
             try
             {
                 _redis = ConnectionMultiplexer.Connect("192.168.56.102:6379"+ ",allowAdmin=true,password=ldk201120841");
-                pubsub = _redis.GetSubscriber();
+                //pubsub = _redis.GetSubscriber();
                 db = _redis.GetDatabase();
                 Console.WriteLine("[RedisClient] Connect Success");
                 return true;
@@ -72,9 +76,13 @@ namespace LunkerRedis.src
 
         public void Release()
         {
-            _redis.Close();
-            _redis.Dispose();
-            _redis = null;
+            if (_redis != null)
+            {
+                _redis.Close();
+                _redis.Dispose();
+                db = null;
+                _redis = null;
+            }
         }
 
         /*
@@ -269,7 +277,6 @@ namespace LunkerRedis.src
             return result;
         }
 
-
         public bool GetUserLogin(string remoteName, int userNumId)
         {
             string delimiter = ":";
@@ -281,8 +288,15 @@ namespace LunkerRedis.src
             sb.Append(login);
 
             string key = sb.ToString();
+            bool result = db.StringGetBit(key, userNumId);
 
-            return db.StringGetBit(key, userNumId);
+            if (result)
+            {
+                logger.Debug($"[{remoteName}][Redis][GetUserLogin()] result : {result}");
+            }
+            else
+                logger.Debug($"[{remoteName}][Redis][GetUserLogin()] result : {result}");
+            return result;
         }
 
         public bool DelUserLoginKey(string remoteName)
@@ -496,14 +510,18 @@ namespace LunkerRedis.src
         public object GetChattingRanking(int range)
         {
             // user id의 배열 
-            RedisValue[] ranks = db.SortedSetRangeByRank(Common.RedisKey.Ranking_Chatting, 0, range, Order.Descending);
-
+            //RedisValue[] ranks = db.SortedSetRangeByRank(Common.RedisKey.Ranking_Chatting, 0, range, Order.Descending);
+            
+            SortedSetEntry[] ranks = db.SortedSetRangeByRankWithScores(Common.RedisKey.Ranking_Chatting, 0, range, Order.Descending);
+            /*
             string[] resultList = new string[ranks.Length];
             for(int idx=0; idx<resultList.Length; idx++)
             {
                 resultList[idx] = (string) ranks[idx];
             }
-            return resultList;
+            */
+
+            return ranks;
         }
 
         /*

@@ -13,6 +13,8 @@ public struct CBRanking
 
     int rank;
 
+    int score;
+
     public char[] Id
     {
         get { return this.id; }
@@ -24,4 +26,12 @@ public struct CBRanking
         get { return this.rank; }
         set { this.rank = value; }
     }
+
+
+    public int Score
+    {
+        get { return this.score;  }
+        set { this.score = value; }
+    }
+
 }

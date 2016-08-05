@@ -13,6 +13,7 @@ using log4net;
 using System.Timers;
 using System.Threading;
 using LunkerRedis.src.Frame.FE_BE;
+using StackExchange.Redis;
 
 namespace LunkerRedis.src
 {
@@ -27,13 +28,14 @@ namespace LunkerRedis.src
         private bool threadState = MyConst.Run;
         private int healthCount = 0;
 
-
         public ClientHandler() { }
         public ClientHandler(Socket handler)
         {
             this.peer = handler;
-            redis = RedisClient.RedisInstance;
-            mysql = MySQLClient.Instance;
+            //redis = RedisClient.RedisInstance;
+            redis = RedisClientPool.GetInstance();
+            //mysql = MySQLClient.Instance;
+            mysql = MySQLClientPool.GetInstance();
         }
 
 
@@ -79,7 +81,6 @@ namespace LunkerRedis.src
             timer.Start();
             */
 
-
             while (threadState)
             {
                 // Read Request
@@ -117,8 +118,10 @@ namespace LunkerRedis.src
                 {
                     Console.WriteLine("error!!!!!!!!!!!!!!!!!!!!!!");
                     peer.Close();
-                    //redis.Release();
-                    //mysql.Release();
+
+                    RedisClientPool.ReleaseObject(redis);
+                    MySQLClientPool.ReleaseObject(mysql);
+
                     logger.Debug("[ce_handler][HandleRequest()] Client Handler Exit.");
                     return;
                 }
@@ -294,37 +297,44 @@ namespace LunkerRedis.src
             logger.Debug("[ce_handler][HandleChatRanking()] 랭킹 조회 시작");
             int maxRange = 10;
 
-            string[] results = (string[]) redis.GetChattingRanking(maxRange);
+            SortedSetEntry[] results = (SortedSetEntry[]) redis.GetChattingRanking(maxRange);
 
-            CBRanking[] ranking = new CBRanking[maxRange];
+            CBRanking[] ranking = new CBRanking[results.Length];
 
             for (int idx = 0; idx < results.Length; idx++)
             {
                 ranking[idx] = new CBRanking();
                 ranking[idx].Id = new char[12];
 
-                char[] feNameArr = new char[12];
-                //Array.Copy(feName.ToCharArray(), feNameArr, feName.ToCharArray().Length);
+                ////Array.Copy(feName.ToCharArray(), feNameArr, feName.ToCharArray().Length);
 
-                Array.Copy(results[idx].ToCharArray(), ranking[idx].Id, results[idx].ToCharArray().Length); 
+                Array.Copy( ((string)results[idx].Element).ToCharArray(), ranking[idx].Id, ((string)results[idx].Element).ToCharArray().Length); 
                 ranking[idx].Rank = idx+1;
+                ranking[idx].Score = (int) results[idx].Score;
             }
 
             logger.Debug("[ce_handler][HandleChatRanking()] 랭킹 조회 결과 : " + results.Length);
 
-
-            byte[] rankingArr = NetworkManager.CBRankingStructureArrayToByte(ranking, typeof(CBRanking));
-            // generate Header
-            CBHeader header = new CBHeader();
-            header.Type = CBMessageType.Chat_Ranking;
-            header.State = CBMessageState.SUCCESS;
-            header.Length = rankingArr.Length;
-
-            // send header
-            NetworkManager.Send(peer, header);
-            if(ranking.Length!=0)
-                // send body
+            if (ranking.Length != 0)
+            {
+                byte[] rankingArr = NetworkManager.CBRankingStructureArrayToByte(ranking, typeof(CBRanking));
+                // generate Header
+                CBHeader header = new CBHeader();
+                header.Type = CBMessageType.Chat_Ranking;
+                header.State = CBMessageState.SUCCESS;
+                header.Length = rankingArr.Length;
+                NetworkManager.Send(peer, header);
                 NetworkManager.Send(peer, rankingArr);
+            }
+            else
+            {
+                // send header
+                CBHeader header = new CBHeader();
+                header.Type = CBMessageType.Chat_Ranking;
+                header.State = CBMessageState.SUCCESS;
+                header.Length = ranking.Length;
+                NetworkManager.Send(peer, header);
+            }
 
             logger.Debug("[ce_handler][HandleChatRanking()] 랭킹 조회 종료");
             return;
