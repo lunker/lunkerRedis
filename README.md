@@ -96,7 +96,7 @@ Team [혜진-태우-동규]
 
 4) log4net Config 설정 
 - path : release/config/LogConfig.xml
-- 아래 항목 중 '<file>'을 수정하여 원하는 로그 파일 저장 경로 설정. 
+- 아래 항목 중 'file'을 수정하여 원하는 로그 파일 저장 경로 설정. 
 
 ```
 <log4net>
