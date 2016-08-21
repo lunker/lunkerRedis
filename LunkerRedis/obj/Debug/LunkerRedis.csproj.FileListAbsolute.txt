@@ -15,3 +15,4 @@ D:\workspace\lunkerRedis\LunkerRedis\obj\Debug\LunkerRedis.exe.manifest
 D:\workspace\lunkerRedis\LunkerRedis\obj\Debug\LunkerRedis.application
 D:\workspace\lunkerRedis\LunkerRedis\obj\Debug\LunkerRedis.exe
 D:\workspace\lunkerRedis\LunkerRedis\obj\Debug\LunkerRedis.pdb
+C:\be\LunkerRedis.exe.config
