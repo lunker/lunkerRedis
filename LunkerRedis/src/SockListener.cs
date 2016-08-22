@@ -51,14 +51,17 @@ namespace LunkerRedis.src
                 {
                     Socket peer = null;
                     peer = listener.Accept();
-
+                    Console.WriteLine("[be] accept!!");
                     if (PORT == MyConst.clientPort)
                     {
+                        /*
                         ClientHandler handler = new ClientHandler(peer);
 
                         Thread clientThread = new Thread(new ThreadStart(handler.HandleRequest));
                         clientHandlerList.Add(handler);
                         clientThread.Start();
+                        */
+
                     }
                     else
                     {

@@ -14,7 +14,9 @@ namespace LunkerRedis.src.Common
             // Read MySQL Config
             StringBuilder sb = new StringBuilder();
 
-            XmlTextReader reader = new XmlTextReader("config\\MySQLConfig.xml");
+            //XmlTextReader reader = new XmlTextReader("config\\MySQLConfig.xml");
+            XmlTextReader reader = new XmlTextReader("D:\\workspace\\LunkerRedis\\LunkerRedis\\config\\MySQLConfig.xml");
+            
             while (reader.Read())
             {
 
@@ -41,7 +43,7 @@ namespace LunkerRedis.src.Common
             /*
              * read redis config 
              */
-            reader = new XmlTextReader("config\\RedisConfig.xml");
+            reader = new XmlTextReader("C:\\be\\config\\RedisConfig.xml");
             int index = 0;
             string ip = "";
             int port = 0;
@@ -70,7 +72,7 @@ namespace LunkerRedis.src.Common
             redisConfig = ip + ":" + port + ",allowAdmin=true";
 
             // read App Config 
-            reader = new XmlTextReader("config\\Appconfig.xml");
+            reader = new XmlTextReader("C:\\be\\config\\AppConfig.xml");
             
             while (reader.Read())
             {
@@ -104,7 +106,7 @@ namespace LunkerRedis.src.Common
         public static string mysqlConfig = "";
         public static string redisConfig = "";
 
-        public static int frontendPort = 25389;
+        public static int frontendPort = 43350;
         public static int clientPort = 20852;
       
         public static int HEADER_LENGTH = 4;
@@ -115,7 +117,7 @@ namespace LunkerRedis.src.Common
         public static bool Dummy = true;
         public static bool User = false;
 
-        public static string LoggerConfigPath = "config\\Logconfig.xml";
+        public static string LoggerConfigPath = "D:\\workspace\\LunkerRedis\\LunkerRedis\\config\\Logconfig.xml";
         public static string Logger = "Logger";
 
         public static bool Run = true;

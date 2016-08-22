@@ -29,19 +29,45 @@ namespace LunkerRedis
         private bool threadState = MyConst.Run;
         private ILog logger = FileLogger.GetLoggerInstance();
 
+        private bool appState = MyConst.Run;
         public void Start()
         {
             while (threadState)
             {
-                if(frontendListener == null)
+                if (frontendListener == null)
                 {
                     StartFrontendListener();
                 }
 
+                /*
                 if(clientListener == null)
                 {
                     StartClientListener();
                 }
+                */
+
+
+                Console.Write("어플리케이션을 종료하시겠습니까? (y/n) : ");
+                string close = Console.ReadLine();
+                if (close.Equals("y") || close.Equals("Y"))
+                {
+                    //backendServer.RequestStopThread();// stop all thread
+                    RedisClientPool.GetInstance().ClearDB(); // clear db
+                    RedisClientPool.Dispose(); // release object pool
+                    MySQLClientPool.Dispose(); // release object pool
+                    threadState = MyConst.Exit; // exit main thread
+
+                    Console.Clear();
+                    Console.Write("어플리케이션을 종료중입니다 . . .");
+                    logger.Debug("--------------------------------------------Exit Program-----------------------------------------------------");
+                    Environment.Exit(0); // exit main process
+                }
+                else
+                {
+                    Console.Clear();
+                    Console.WriteLine("다시 입력하십시오.");
+                }
+
             }
         }
         /// <summary>
@@ -52,10 +78,19 @@ namespace LunkerRedis
 
             // connection for FE 
             frontendListener = new SockListener(IPAddress.Any.ToString(), MyConst.frontendPort);
+            //IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Any);
             if (frontendListener.Connect())
+            {
+                Console.WriteLine("[FE_LISTENER] conenct success");
                 logger.Debug("[FE_LISTENER] conenct success");
+            }
+
             else
+            {
+                Console.WriteLine("[FE_LISTENER] conenct fail");
                 logger.Debug("[FE_LISTENER] conenct fail");
+            }
+                
 
             Thread fListenerThread = new Thread(new ThreadStart(frontendListener.Listen));
             fListenerThread.Start();

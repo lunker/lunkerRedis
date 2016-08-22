@@ -33,3 +33,7 @@ D:\workspace\developRedis\lunkerRedis\LunkerRedis\obj\Release\LunkerRedis.exe.ma
 D:\workspace\developRedis\lunkerRedis\LunkerRedis\obj\Release\LunkerRedis.application
 D:\workspace\developRedis\lunkerRedis\LunkerRedis\obj\Release\LunkerRedis.exe
 D:\workspace\developRedis\lunkerRedis\LunkerRedis\obj\Release\LunkerRedis.pdb
+D:\workspace\LunkerRedis\LunkerRedis\bin\Release\LunkerLibrary.dll
+D:\workspace\LunkerRedis\LunkerRedis\bin\Release\LunkerProtocol.dll
+D:\workspace\LunkerRedis\LunkerRedis\bin\Release\LunkerLibrary.pdb
+D:\workspace\LunkerRedis\LunkerRedis\bin\Release\LunkerProtocol.pdb

@@ -72,6 +72,14 @@
       <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="LunkerLibrary, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\feature-async-without-beginxxxx\LunkerFrontend\LunkerLibrary\bin\Release\LunkerLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="LunkerProtocol, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\feature-async-without-beginxxxx\LunkerFrontend\LunkerProtocol\bin\Release\LunkerProtocol.dll</HintPath>
+    </Reference>
     <Reference Include="MySql.Data, Version=6.9.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL" />
     <Reference Include="StackExchange.Redis, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\StackExchange.Redis.1.1.603\lib\net45\StackExchange.Redis.dll</HintPath>
@@ -93,27 +101,7 @@
     <Compile Include="src\Common\ProtocolLength.cs" />
     <Compile Include="src\Common\MyConst.cs" />
     <Compile Include="src\Common\RedisKey.cs" />
-    <Compile Include="src\Frame\Client-BE\CBHeader.cs" />
-    <Compile Include="src\Frame\Client-BE\CBFEUserStatus.cs" />
-    <Compile Include="src\Frame\Client-BE\CBLoginRequestBody.cs" />
-    <Compile Include="src\Frame\Client-BE\CBRanking.cs" />
-    <Compile Include="src\Frame\Client-FE\CFHeader.cs" />
-    <Compile Include="src\Frame\Client-FE\CFJoinFailBody.cs" />
-    <Compile Include="src\Frame\Client-FE\CFLoginResponseBody.cs" />
-    <Compile Include="src\Frame\Client-FE\CFRoomRequestBody.cs" />
-    <Compile Include="src\Frame\Client-FE\CFRoomResponseBody.cs" />
-    <Compile Include="src\Frame\Client-FE\CFSignRequestBody.cs" />
-    <Compile Include="src\Frame\Client-FE\ChatBody.cs" />
-    <Compile Include="src\Frame\FE-BE\FBChatRequestBody.cs" />
-    <Compile Include="src\Frame\FE-BE\FBConnectionInfo.cs" />
-    <Compile Include="src\Frame\FE-BE\FBHeader.cs" />
-    <Compile Include="src\Frame\FE-BE\FBLoginRequestBody.cs" />
-    <Compile Include="src\Frame\FE-BE\FBLoginResponseBody.cs" />
-    <Compile Include="src\Frame\FE-BE\FBRoomRequestBody.cs" />
-    <Compile Include="src\Frame\FE-BE\FBRoomResponseBody.cs" />
-    <Compile Include="src\Frame\FE-BE\FBSignupRequestBody.cs" />
-    <Compile Include="src\Frame\FE-BE\FBSignupResponseBody.cs" />
-    <Compile Include="src\Frame\FE-BE\FEInfo.cs" />
+    <Compile Include="src\Frame\FEInfo.cs" />
     <Compile Include="src\Frame\Schema\User.cs" />
     <Compile Include="src\FrontendHandler.cs" />
     <Compile Include="Program.cs" />
@@ -126,7 +114,6 @@
     <Compile Include="src\Utils\FENameGenerator.cs" />
     <Compile Include="src\Utils\FileLogger.cs" />
     <Compile Include="src\Utils\ChatRoomNumberGenerator.cs" />
-    <Compile Include="src\Utils\NetworkManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

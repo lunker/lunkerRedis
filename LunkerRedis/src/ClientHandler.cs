@@ -12,8 +12,9 @@ using System.Threading.Tasks;
 using log4net;
 using System.Timers;
 using System.Threading;
-using LunkerRedis.src.Frame.FE_BE;
+
 using StackExchange.Redis;
+using LunkerLibrary.common.Utils;
 
 namespace LunkerRedis.src
 {
@@ -36,6 +37,7 @@ namespace LunkerRedis.src
             mysql = MySQLClientPool.GetInstance();
         }
 
+        /*
         /// <summary>
         /// Send Health Check Message
         /// </summary>
@@ -54,14 +56,16 @@ namespace LunkerRedis.src
             }
 
             CBHeader header = new CBHeader();
-            header.Type = CBMessageType.Health_Check;
-            header.State = CBMessageState.REQUEST;
+            header.Type = MessageType.Health_Check;
+            header.State = MessageState.REQUEST;
             header.Length = 0;
 
             NetworkManager.Send(peer, header);
 
             return;
         }
+        */
+
 
         /// <summary>
         /// Handle Health Check Receive
@@ -78,19 +82,14 @@ namespace LunkerRedis.src
         {
             threadState = MyConst.Exit;
         }
-
+        /*
         /// <summary>
         /// Monitoring Client의 request 처리 
         /// </summary>
         public void HandleRequest()
         {
             logger.Debug("[ce_handler][HandleRequest()]");
-            /*
-            System.Timers.Timer timer = new System.Timers.Timer();
-            timer.Interval = 5 * 1000; // 5초
-            timer.Elapsed += new ElapsedEventHandler(SendHealthCheck);
-            timer.Start();
-            */
+           
 
             while (threadState)
             {
@@ -102,11 +101,11 @@ namespace LunkerRedis.src
 
                     switch (header.type)
                     {
-                        /*
+                        
                         case CBMessageType.Health_Check:
                             HandleHealthCheck();
                             break;
-                        */
+                        
                         case CBMessageType.Login:
                             HandleLogin(header.Length);
                             break;
@@ -159,7 +158,7 @@ namespace LunkerRedis.src
                 // 유효하지 않은 아이디 입력 
                 responseHeader.Type = CBMessageType.Login;
                 responseHeader.Length = 0;
-                responseHeader.State = CBMessageState.FAIL;
+                responseHeader.State = MessageState.FAIL;
 
                 NetworkManager.Send(peer, responseHeader);
                 logger.Debug("[ce_handler][HandleLogin()] 유효하지 않은 아이디");
@@ -175,12 +174,12 @@ namespace LunkerRedis.src
             // 로그인 성공 
             if (!result.Equals(null) && result.Password.Equals(password))
             {
-                responseHeader.State = CBMessageState.SUCCESS;
+                responseHeader.State = MessageState.SUCCESS;
                 logger.Debug("[ce_handler][HandleLogin()] 로그인 성공");
             }
             else
             {
-                responseHeader.State = CBMessageState.FAIL;
+                responseHeader.State = MessageState.FAIL;
                 logger.Debug("[ce_handler][HandleLogin()] 로그인 실패");
             }
 
@@ -210,7 +209,7 @@ namespace LunkerRedis.src
 
             CBHeader header = new CBHeader();
             header.Type = CBMessageType.Total_Room_Count;
-            header.State = CBMessageState.SUCCESS;
+            header.State = MessageState.SUCCESS;
 
             byte[] data = BitConverter.GetBytes(sum);
 
@@ -267,7 +266,7 @@ namespace LunkerRedis.src
 
             CBHeader header = new CBHeader();
             header.Type = CBMessageType.FE_User_Status;
-            header.State = CBMessageState.SUCCESS;
+            header.State = MessageState.SUCCESS;
 
             logger.Debug("[ce_handler][HandleFEUserStatus()] fe 갯수 : " + feStatusList.Length);
             
@@ -320,7 +319,7 @@ namespace LunkerRedis.src
                 // generate Header
                 CBHeader header = new CBHeader();
                 header.Type = CBMessageType.Chat_Ranking;
-                header.State = CBMessageState.SUCCESS;
+                header.State = MessageState.SUCCESS;
                 header.Length = rankingArr.Length;
                 NetworkManager.Send(peer, header);
                 NetworkManager.Send(peer, rankingArr);
@@ -330,7 +329,7 @@ namespace LunkerRedis.src
                 // send header
                 CBHeader header = new CBHeader();
                 header.Type = CBMessageType.Chat_Ranking;
-                header.State = CBMessageState.SUCCESS;
+                header.State = MessageState.SUCCESS;
                 header.Length = ranking.Length;
                 NetworkManager.Send(peer, header);
             }
@@ -344,6 +343,8 @@ namespace LunkerRedis.src
             logger.Debug($"[fe_handler][HandleError] 정의되지 않은 메세지  ");
             return;
         }
+        */
+
     }// end class
 
 

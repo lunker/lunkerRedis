@@ -23,6 +23,8 @@ namespace LunkerRedis.src.Frame.FE_BE
 
         }
 
+        
+
         public string Name
         {
             get { return this.name; }
@@ -32,7 +34,7 @@ namespace LunkerRedis.src.Frame.FE_BE
         public string Ip
         {
             get { return this.ip; }
-            set { this.ip= value; }
+            set { this.ip = value; }
         }
         public int Port
         {

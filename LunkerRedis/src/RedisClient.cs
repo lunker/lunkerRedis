@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 using StackExchange.Redis;
 using LunkerRedis.src.Utils;
 using LunkerRedis.src.Common;
-using LunkerRedis.src.Frame.FE_BE;
+
 using System.Xml;
 using log4net;
+using LunkerLibrary.common.protocol;
+using LunkerRedis.src.Frame.FE_BE;
 
 namespace LunkerRedis.src
 {
@@ -38,6 +40,7 @@ namespace LunkerRedis.src
                 _redis = ConnectionMultiplexer.Connect(MyConst.redisConfig);
                 db = _redis.GetDatabase();
                 logger.Debug("redis connect success!!!");
+                Console.WriteLine("redis: connect");
                 return true;
             }
             catch (Exception e)
