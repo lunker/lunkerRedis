@@ -78,7 +78,7 @@
     </Reference>
     <Reference Include="LunkerProtocol, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\feature-async-without-beginxxxx\LunkerFrontend\LunkerProtocol\bin\Release\LunkerProtocol.dll</HintPath>
+      <HintPath>..\..\feature-async-without-beginxxxx\LunkerFrontend\LunkerLibrary\bin\Release\LunkerProtocol.dll</HintPath>
     </Reference>
     <Reference Include="MySql.Data, Version=6.9.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL" />
     <Reference Include="StackExchange.Redis, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">

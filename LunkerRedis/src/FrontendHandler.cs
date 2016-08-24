@@ -79,9 +79,9 @@ namespace LunkerRedis.src
         /// </summary>
         public void SetFEServiceInfo()
         {
-            Console.WriteLine("front: set fe service info");
+            Console.WriteLine("front: set chat server service info");
             CommonHeader requestHeader = new CommonHeader();
-            requestHeader.Type = MessageType.FENotice;
+            requestHeader.Type = MessageType.BENotice;
             requestHeader.State = MessageState.Request;
             requestHeader.BodyLength = 0;
             requestHeader.Cookie = new Cookie();
@@ -93,16 +93,26 @@ namespace LunkerRedis.src
             CommonHeader header = (CommonHeader)LunkerLibrary.common.Utils.NetworkManager.Read(peer, Constants.HeaderSize , typeof(CommonHeader));
 
 
-            CBServerInfoNoticeResponseBody connectionInfo = (CBServerInfoNoticeResponseBody) NetworkManager.Read(peer, header.BodyLength, typeof(CBServerInfoNoticeResponseBody));
+            
 
-            string ip = connectionInfo.ServerInfo.GetPureIp();
-            int port = connectionInfo.ServerInfo.Port;
+            if(header.State == MessageState.Success)
+            {
+                CBServerInfoNoticeResponseBody connectionInfo = (CBServerInfoNoticeResponseBody)NetworkManager.Read(peer, header.BodyLength, typeof(CBServerInfoNoticeResponseBody));
 
-            redis.AddFEServiceInfo(remoteName, ip, port);
+                string ip = connectionInfo.ServerInfo.GetPureIp();
+                int port = connectionInfo.ServerInfo.Port;
 
-            remoteServicePort = port;
-            logger.Debug($"[fe_handler][{remoteName}] real fe info {ip} : {port}");
-            Console.WriteLine($"[fe_handler][{remoteName}] real fe info {ip} : {port}");
+                redis.AddFEServiceInfo(remoteName, ip, port);
+
+                remoteServicePort = port;
+                logger.Debug($"[fe_handler][{remoteName}] real fe info {ip} : {port}");
+                Console.WriteLine($"[fe_handler][{remoteName}] real fe info {ip} : {port}");
+            }
+            else
+            {
+                Console.WriteLine($"[fe_handler][{remoteName}] login server!");
+            }
+            
         }
          
         /// <summary>
@@ -123,7 +133,7 @@ namespace LunkerRedis.src
             {
                 //StartHealthCheckTimer(); // start HealthCheckTimer
                 Initialize(); // Initialize FrontEnd Handle
-                //SetFEServiceInfo(); // Get Connected FE Info
+                SetFEServiceInfo(); // Get Connected FE Info
             }
             catch (SocketException se)
             {
@@ -441,6 +451,8 @@ namespace LunkerRedis.src
 
                         // send result : header
                         NetworkManager.Send(peer, responseHeader);
+                        Console.WriteLine($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 다른 서버에 해당 유저 들어가있음.");
+                        Console.WriteLine($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 로그인 실패");
                         logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 다른 서버에 해당 유저 들어가있음.");
                         logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 로그인 실패");
                         return;
@@ -466,10 +478,11 @@ namespace LunkerRedis.src
                 response.Cookie = new Cookie();
                 responseHeader.BodyLength = Marshal.SizeOf(response);
 
+                //NetworkManager.Send(peer, responseHeader, response);
                 NetworkManager.Send(peer, responseHeader);
                 NetworkManager.Send(peer, response);
                 logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 로그인 성공");
-
+                Console.WriteLine($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 로그인 성공");
             }
             else
             {
@@ -477,7 +490,8 @@ namespace LunkerRedis.src
 
                 // send result : header
                 NetworkManager.Send(peer, responseHeader);
-                logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 로그인 실패");
+                Console.WriteLine($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 로그인 실패");
+                //logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 로그인 실패");
             }
             logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 로그인 종료");
             Console.WriteLine($"[fe_handler][{remoteName}][{remoteServicePort}][HandleLogin()] 로그인 종료");
@@ -505,7 +519,7 @@ namespace LunkerRedis.src
             string id = requestHeader.UserInfo.GetPureId();
             int userNumId = redis.GetUserNumIdCache(id);
 
-            CommonHeader responseHeader = new CommonHeader();
+            CommonHeader responseHeader = requestHeader;
             responseHeader.Type = MessageType.Logout;
             responseHeader.BodyLength = 0;
             responseHeader.Cookie = new Cookie();
@@ -602,11 +616,13 @@ namespace LunkerRedis.src
         public void HandleCreateChatRoom(CommonHeader requestHeader)
         {
             // read request body 
-            
+            Console.WriteLine($"[fe_handler][{remoteName}][{remoteServicePort}][HandleCreateChatRoom() 채팅방 생성 시작");
             logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleCreateChatRoom() 채팅방 생성 시작");
 
             string id = requestHeader.UserInfo.GetPureId();
             int result = redis.CreateChatRoom(remoteName,id);
+
+            Console.WriteLine($"[fe_handler][{remoteName}][{remoteServicePort}][HandleCreateChatRoom()] 생성된 채팅방 번호 : {result}");
             logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleCreateChatRoom()] 생성된 채팅방 번호 : {result}");
 
             ChattingRoom createdRoom = new ChattingRoom(result);
@@ -620,11 +636,13 @@ namespace LunkerRedis.src
             header.BodyLength = Marshal.SizeOf(responseBody);
 
             // body
+            //NetworkManager.Send(peer, header, responseBody); 
             NetworkManager.Send(peer, header);
             NetworkManager.Send(peer, responseBody);
            
 
             logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleCreateChatRoom() 채팅방 생성종료");
+            Console.WriteLine($"[fe_handler][{remoteName}][{remoteServicePort}][HandleCreateChatRoom() 채팅방 생성종료");
             return;
         }
 
@@ -771,8 +789,10 @@ namespace LunkerRedis.src
                 {
                     responseHeader.BodyLength = Marshal.SizeOf(responseBody);
 
-                    NetworkManager.Send(peer, responseHeader);
-                    NetworkManager.Send(peer, responseBody);
+                    NetworkManager.Send(peer, responseHeader, responseBody);
+
+                    //NetworkManager.Send(peer, responseHeader);
+                    //NetworkManager.Send(peer, responseBody);
                     logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleJoinRoom] 다른 서버에 채팅방이 존재, 종료");
                     logger.Debug($"[fe_handler][{remoteName}][{remoteServicePort}][HandleJoinRoom] 채팅방 입장 종료");
                 }
@@ -840,10 +860,14 @@ namespace LunkerRedis.src
                 header.State = MessageState.Success;
 
                 // 3) send header
+                NetworkManager.Send(peer, header, data);
+
+                /*
                 NetworkManager.Send(peer, header);
 
                 // 3) send data
-                NetworkManager.Send(peer, data);
+                NeworkManager.Send(peer, data);
+                */
             }
             else
             {
